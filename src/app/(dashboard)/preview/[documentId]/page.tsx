@@ -3,9 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
+import dynamic from 'next/dynamic';
 import {
   ArrowLeft,
   Download,
@@ -21,8 +19,17 @@ import { useToggleFavorite } from '@/hooks/use-documents';
 import { cn } from '@/lib/utils';
 import type { DocumentData } from '@/types/api';
 
-// Configure pdf.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+const PdfViewer = dynamic(
+  () => import('@/components/preview/pdf-viewer').then((mod) => mod.PdfViewer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
+      </div>
+    ),
+  },
+);
 
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -67,7 +74,6 @@ function usePinchZoom(containerRef: React.RefObject<HTMLDivElement | null>) {
       }
     }
 
-    // Use a variable to capture the current scale for the touchstart handler
     el.addEventListener('touchstart', onTouchStart, { passive: true });
     el.addEventListener('touchmove', onTouchMove, { passive: false });
 
@@ -79,7 +85,7 @@ function usePinchZoom(containerRef: React.RefObject<HTMLDivElement | null>) {
 
   const resetScale = useCallback(() => setScale(1), []);
 
-  return { scale, setScale, resetScale };
+  return { scale, resetScale };
 }
 
 export default function PreviewPage() {
@@ -87,8 +93,6 @@ export default function PreviewPage() {
   const router = useRouter();
   const documentId = params.documentId;
 
-  const [numPages, setNumPages] = useState<number>(0);
-  const [pdfError, setPdfError] = useState<string | null>(null);
   const [pageWidth, setPageWidth] = useState(400);
   const containerRef = useRef<HTMLDivElement>(null);
   const { scale, resetScale } = usePinchZoom(containerRef);
@@ -99,7 +103,7 @@ export default function PreviewPage() {
   useEffect(() => {
     function updateWidth() {
       if (containerRef.current) {
-        const w = containerRef.current.clientWidth - 16; // 8px padding each side
+        const w = containerRef.current.clientWidth - 16;
         setPageWidth(Math.min(w, 900));
       }
     }
@@ -108,7 +112,6 @@ export default function PreviewPage() {
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
-  // Fetch document metadata
   const {
     data: document,
     isLoading: docLoading,
@@ -121,7 +124,6 @@ export default function PreviewPage() {
       ).then((res) => res.document),
   });
 
-  // Fetch presigned preview URL
   const {
     data: previewUrl,
     isLoading: previewLoading,
@@ -159,15 +161,6 @@ export default function PreviewPage() {
     });
   }, [document, toggleFavorite]);
 
-  const handlePdfLoadSuccess = ({ numPages: n }: { numPages: number }) => {
-    setNumPages(n);
-    setPdfError(null);
-  };
-
-  const handlePdfLoadError = () => {
-    setPdfError('Failed to load PDF. Try downloading instead.');
-  };
-
   const isImage = document?.mimeType.startsWith('image/');
   const isPdf = document?.mimeType === 'application/pdf';
   const isDocx =
@@ -177,7 +170,6 @@ export default function PreviewPage() {
   const isLoading = docLoading || previewLoading;
   const error = docError || previewError;
 
-  // Error state
   if (error && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4 gap-4">
@@ -220,7 +212,6 @@ export default function PreviewPage() {
         )}
 
         <div className="flex items-center gap-1 shrink-0">
-          {/* Show scale indicator + reset when zoomed */}
           {scale !== 1 && (
             <button
               onClick={resetScale}
@@ -257,7 +248,7 @@ export default function PreviewPage() {
         </div>
       </div>
 
-      {/* Preview area — pinch-to-zoom + scroll in all directions */}
+      {/* Preview area */}
       <div
         ref={containerRef}
         className="flex-1 overflow-auto bg-black"
@@ -267,61 +258,13 @@ export default function PreviewPage() {
           <div className="flex items-center justify-center h-full">
             <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
           </div>
-        ) : isPdf && previewUrl ? (
-          pdfError ? (
-            <div className="flex flex-col items-center justify-center h-full gap-4 p-4">
-              <FileText className="h-16 w-16 text-zinc-600" />
-              <p className="text-sm text-zinc-400 text-center">{pdfError}</p>
-              <Button
-                onClick={handleDownload}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download File
-              </Button>
-            </div>
-          ) : (
-            <div
-              style={{
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-                width: scale > 1 ? `${100 / scale}%` : '100%',
-              }}
-            >
-              <div className="flex flex-col items-center py-4 px-2 gap-3">
-                <Document
-                  file={`/api/documents/${documentId}/preview/proxy`}
-                  onLoadSuccess={handlePdfLoadSuccess}
-                  onLoadError={handlePdfLoadError}
-                  loading={
-                    <div className="flex items-center justify-center py-20">
-                      <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
-                    </div>
-                  }
-                  className="flex flex-col items-center gap-3"
-                >
-                  {Array.from(new Array(numPages), (_, index) => (
-                    <Page
-                      key={`page_${index + 1}`}
-                      pageNumber={index + 1}
-                      width={pageWidth}
-                      className="shadow-lg rounded-sm overflow-hidden"
-                      loading={
-                        <div className="flex items-center justify-center h-[500px] w-full bg-zinc-900 rounded-sm">
-                          <Loader2 className="h-6 w-6 text-zinc-500 animate-spin" />
-                        </div>
-                      }
-                    />
-                  ))}
-                </Document>
-                {numPages > 0 && (
-                  <p className="text-xs text-zinc-500 pb-4">
-                    {numPages} {numPages === 1 ? 'page' : 'pages'}
-                  </p>
-                )}
-              </div>
-            </div>
-          )
+        ) : isPdf ? (
+          <PdfViewer
+            fileUrl={`/api/documents/${documentId}/preview/proxy`}
+            pageWidth={pageWidth}
+            scale={scale}
+            onDownload={handleDownload}
+          />
         ) : isImage && previewUrl ? (
           <div
             style={{

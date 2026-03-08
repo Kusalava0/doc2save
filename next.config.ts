@@ -9,6 +9,7 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  turbopack: {},
   images: {
     formats: ["image/avif", "image/webp"],
   },
