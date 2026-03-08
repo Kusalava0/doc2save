@@ -11,11 +11,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://aptsworks.in"),
   title: {
     default: "Doc2Save",
     template: "%s | Doc2Save",
   },
-  description: "Secure cloud document storage for real estate professionals",
+  description: "Secure cloud document storage for real estate professionals. Upload, organize, and access your documents from anywhere.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -23,6 +24,20 @@ export const metadata: Metadata = {
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
     apple: "/icons/apple-touch-icon.png",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Doc2Save",
+    title: "Doc2Save — Secure Cloud Document Storage",
+    description: "Upload, organize, and access your real estate documents from anywhere. Mobile-first, secure, and always available.",
+    url: "https://aptsworks.in",
+    images: [{ url: "/icons/icon-512x512.png", width: 512, height: 512, alt: "Doc2Save" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "Doc2Save — Secure Cloud Document Storage",
+    description: "Upload, organize, and access your real estate documents from anywhere.",
+    images: ["/icons/icon-512x512.png"],
   },
   appleWebApp: {
     capable: true,

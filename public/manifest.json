@@ -1,8 +1,10 @@
 {
   "name": "Doc2Save",
   "short_name": "Doc2Save",
-  "description": "Secure cloud document storage for real estate professionals",
+  "description": "Secure cloud document storage for real estate professionals. Upload, organize, and access your documents from anywhere.",
+  "id": "/dashboard",
   "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
