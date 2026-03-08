@@ -284,8 +284,8 @@ export default function PreviewPage() {
             <div
               style={{
                 transform: `scale(${scale})`,
-                transformOrigin: 'top center',
-                minWidth: scale > 1 ? `${scale * 100}%` : undefined,
+                transformOrigin: 'top left',
+                width: scale > 1 ? `${100 / scale}%` : '100%',
               }}
             >
               <div className="flex flex-col items-center py-4 px-2 gap-3">
@@ -326,8 +326,8 @@ export default function PreviewPage() {
           <div
             style={{
               transform: `scale(${scale})`,
-              transformOrigin: 'top center',
-              minWidth: scale > 1 ? `${scale * 100}%` : undefined,
+              transformOrigin: 'top left',
+              width: scale > 1 ? `${100 / scale}%` : '100%',
             }}
           >
             <div className="flex items-center justify-center min-h-full p-4">
