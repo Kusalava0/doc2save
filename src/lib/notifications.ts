@@ -1,0 +1,72 @@
+const PERMISSION_KEY = 'doc2save-notif-asked';
+
+export async function requestNotificationPermission(): Promise<boolean> {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+
+  const result = await Notification.requestPermission();
+  localStorage.setItem(PERMISSION_KEY, 'true');
+  return result === 'granted';
+}
+
+export function hasAskedPermission(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(PERMISSION_KEY) === 'true';
+}
+
+export function canNotify(): boolean {
+  return typeof window !== 'undefined' &&
+    'Notification' in window &&
+    Notification.permission === 'granted';
+}
+
+export function sendNotification(title: string, options?: NotificationOptions) {
+  if (!canNotify()) return;
+
+  // Use service worker registration if available for better PWA support
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.ready.then((reg) => {
+      reg.showNotification(title, {
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-192x192.png',
+        ...options,
+      });
+    });
+  } else {
+    new Notification(title, {
+      icon: '/icons/icon-192x192.png',
+      ...options,
+    });
+  }
+}
+
+export function notifyUploadComplete(fileName: string) {
+  sendNotification('Upload Complete', {
+    body: `"${fileName}" has been uploaded successfully.`,
+    tag: 'upload-complete',
+  });
+}
+
+export function notifyUploadFailed(fileName: string) {
+  sendNotification('Upload Failed', {
+    body: `"${fileName}" could not be uploaded. Please try again.`,
+    tag: 'upload-failed',
+  });
+}
+
+export function notifySubscriptionExpiring(daysLeft: number) {
+  sendNotification('Subscription Expiring Soon', {
+    body: daysLeft <= 0
+      ? 'Your subscription has expired. Renew to continue uploading.'
+      : `Your subscription expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. Renew to avoid interruption.`,
+    tag: 'subscription-expiring',
+  });
+}
+
+export function notifyStorageWarning(usedPercent: number) {
+  sendNotification('Storage Almost Full', {
+    body: `You've used ${usedPercent}% of your storage. Consider deleting old documents.`,
+    tag: 'storage-warning',
+  });
+}

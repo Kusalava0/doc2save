@@ -1,0 +1,412 @@
+'use client';
+
+import { useState, useCallback, useRef } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useQueryClient } from '@tanstack/react-query';
+import { Upload, X, Loader2, Check, File } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { FileIcon } from '@/components/shared/file-icon';
+import { formatFileSize } from '@/lib/format';
+import {
+  ALLOWED_MIME_TYPES,
+  MAX_FILE_SIZE,
+  MAX_CONCURRENT_UPLOADS,
+} from '@/lib/constants';
+import { queryKeys } from '@/lib/query-keys';
+import { notifyUploadComplete, notifyUploadFailed } from '@/lib/notifications';
+import type { UploadUrlResponse } from '@/types/api';
+
+interface UploadDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  folderId?: string | null;
+}
+
+interface UploadItem {
+  id: string;
+  file: File;
+  status: 'pending' | 'uploading' | 'confirming' | 'success' | 'error';
+  progress: number;
+  error?: string;
+  abortController?: AbortController;
+}
+
+export function UploadDialog({
+  open,
+  onOpenChange,
+  folderId,
+}: UploadDialogProps) {
+  const queryClient = useQueryClient();
+  const [files, setFiles] = useState<UploadItem[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const activeUploadsRef = useRef(0);
+
+  const onDrop = useCallback(
+    (acceptedFiles: File[], rejectedFiles: any[]) => {
+      rejectedFiles.forEach((r: any) => {
+        const name = r.file?.name || 'File';
+        if (r.errors?.some((e: any) => e.code === 'file-too-large')) {
+          toast.error(`${name} exceeds the 50MB size limit`);
+        } else if (r.errors?.some((e: any) => e.code === 'file-invalid-type')) {
+          toast.error(`${name} has an unsupported file type`);
+        }
+      });
+
+      const newItems: UploadItem[] = acceptedFiles.map((file) => ({
+        id: `${file.name}-${Date.now()}-${Math.random()}`,
+        file,
+        status: 'pending' as const,
+        progress: 0,
+      }));
+
+      setFiles((prev) => [...prev, ...newItems]);
+    },
+    []
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: ALLOWED_MIME_TYPES.reduce(
+      (acc, type) => ({ ...acc, [type]: [] }),
+      {} as Record<string, string[]>
+    ),
+    maxSize: MAX_FILE_SIZE,
+    disabled: isUploading,
+  });
+
+  const removeFile = (id: string) => {
+    setFiles((prev) => {
+      const item = prev.find((f) => f.id === id);
+      if (item?.abortController) item.abortController.abort();
+      return prev.filter((f) => f.id !== id);
+    });
+  };
+
+  const uploadSingleFile = async (item: UploadItem): Promise<void> => {
+    const abortController = new AbortController();
+
+    setFiles((prev) =>
+      prev.map((f) =>
+        f.id === item.id
+          ? { ...f, status: 'uploading' as const, progress: 0, abortController }
+          : f
+      )
+    );
+
+    try {
+      // Step 1: Get presigned URL
+      const urlRes = await fetch('/api/documents/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: item.file.name,
+          mimeType: item.file.type,
+          size: item.file.size,
+          folderId: folderId ?? null,
+        }),
+        signal: abortController.signal,
+      });
+
+      if (!urlRes.ok) {
+        const body = await urlRes
+          .json()
+          .catch(() => ({ error: 'Failed to get upload URL' }));
+        throw new Error(body.error || 'Failed to get upload URL');
+      }
+
+      const { uploadUrl, documentId, r2Key }: UploadUrlResponse =
+        await urlRes.json();
+
+      // Step 2: Upload to presigned URL via XHR for progress tracking
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setFiles((prev) =>
+              prev.map((f) =>
+                f.id === item.id ? { ...f, progress: pct } : f
+              )
+            );
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        });
+
+        xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+        xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+
+        abortController.signal.addEventListener('abort', () => xhr.abort());
+
+        xhr.open('PUT', uploadUrl);
+        xhr.setRequestHeader('Content-Type', item.file.type);
+        xhr.send(item.file);
+      });
+
+      // Step 3: Confirm upload
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === item.id
+            ? { ...f, status: 'confirming' as const, progress: 100 }
+            : f
+        )
+      );
+
+      const confirmRes = await fetch('/api/documents/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId, r2Key }),
+        signal: abortController.signal,
+      });
+
+      if (!confirmRes.ok) {
+        const body = await confirmRes
+          .json()
+          .catch(() => ({ error: 'Confirm failed' }));
+        throw new Error(body.error || 'Confirm failed');
+      }
+
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === item.id ? { ...f, status: 'success' as const } : f
+        )
+      );
+
+      notifyUploadComplete(item.file.name);
+    } catch (err: any) {
+      if (err?.name === 'AbortError' || err?.message === 'Upload cancelled') {
+        setFiles((prev) => prev.filter((f) => f.id !== item.id));
+        return;
+      }
+
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === item.id
+            ? { ...f, status: 'error' as const, error: err.message }
+            : f
+        )
+      );
+
+      notifyUploadFailed(item.file.name);
+    }
+  };
+
+  const processQueue = async (items: UploadItem[]) => {
+    const queue = [...items];
+
+    const processNext = async (): Promise<void> => {
+      if (queue.length === 0) return;
+      const item = queue.shift()!;
+      activeUploadsRef.current++;
+      await uploadSingleFile(item);
+      activeUploadsRef.current--;
+      await processNext();
+    };
+
+    // Start up to MAX_CONCURRENT_UPLOADS workers
+    const workers = Array.from(
+      { length: Math.min(MAX_CONCURRENT_UPLOADS, queue.length) },
+      () => processNext()
+    );
+
+    await Promise.all(workers);
+  };
+
+  const handleUpload = async () => {
+    const pendingFiles = files.filter((f) => f.status === 'pending');
+    if (pendingFiles.length === 0) return;
+
+    setIsUploading(true);
+    await processQueue(pendingFiles);
+    setIsUploading(false);
+
+    // Invalidate queries on completion
+    queryClient.invalidateQueries({ queryKey: queryKeys.documents.all });
+    queryClient.invalidateQueries({ queryKey: queryKeys.documents.recent });
+    queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+    queryClient.invalidateQueries({ queryKey: queryKeys.userProfile });
+
+    const successCount = files.filter((f) => f.status === 'success').length;
+    if (successCount > 0) {
+      toast.success(
+        `${successCount} file${successCount > 1 ? 's' : ''} uploaded successfully`
+      );
+    }
+  };
+
+  const handleClose = (open: boolean) => {
+    if (isUploading) return; // Prevent closing during upload
+    setFiles([]);
+    onOpenChange(open);
+  };
+
+  const pendingCount = files.filter((f) => f.status === 'pending').length;
+  const allDone =
+    files.length > 0 && files.every((f) => f.status === 'success' || f.status === 'error');
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="bg-zinc-950 border-zinc-800 text-white sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-white">Upload Documents</DialogTitle>
+        </DialogHeader>
+
+        {/* Drop zone */}
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
+            isDragActive
+              ? 'border-blue-500 bg-blue-500/10'
+              : 'border-zinc-700 hover:border-zinc-600'
+          } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+        >
+          <input {...getInputProps()} />
+          <Upload className="h-8 w-8 text-zinc-500 mx-auto mb-3" />
+          {isDragActive ? (
+            <p className="text-sm text-blue-400">Drop files here...</p>
+          ) : (
+            <>
+              <p className="text-sm text-zinc-300 mb-1">
+                Drag & drop files here, or click to browse
+              </p>
+              <p className="text-xs text-zinc-500">
+                PDF, JPEG, PNG, HEIC, DOCX up to 50MB
+              </p>
+            </>
+          )}
+        </div>
+
+        {/* File list */}
+        {files.length > 0 && (
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {files.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center gap-3 rounded-lg bg-zinc-900 px-3 py-2.5"
+              >
+                <FileIcon mimeType={item.file.type} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white truncate">
+                    {item.file.name}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-zinc-500">
+                      {formatFileSize(item.file.size)}
+                    </span>
+                    {item.status === 'uploading' && (
+                      <span className="text-xs text-blue-400">
+                        {item.progress}%
+                      </span>
+                    )}
+                    {item.status === 'confirming' && (
+                      <span className="text-xs text-yellow-400">
+                        Confirming...
+                      </span>
+                    )}
+                    {item.status === 'success' && (
+                      <span className="text-xs text-green-400">Done</span>
+                    )}
+                    {item.status === 'error' && (
+                      <span className="text-xs text-red-400">
+                        {item.error || 'Failed'}
+                      </span>
+                    )}
+                  </div>
+                  {(item.status === 'uploading' ||
+                    item.status === 'confirming') && (
+                    <Progress
+                      value={item.progress}
+                      className="h-1 mt-1 bg-zinc-800 [&>div]:bg-blue-500"
+                    />
+                  )}
+                </div>
+                <div className="flex-shrink-0">
+                  {item.status === 'success' ? (
+                    <Check className="h-4 w-4 text-green-400" />
+                  ) : item.status === 'uploading' ||
+                    item.status === 'confirming' ? (
+                    <button
+                      onClick={() => removeFile(item.id)}
+                      className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  ) : item.status === 'error' ? (
+                    <button
+                      onClick={() => removeFile(item.id)}
+                      className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => removeFile(item.id)}
+                      className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex justify-end gap-2 pt-2">
+          {allDone ? (
+            <Button
+              onClick={() => handleClose(false)}
+              className="bg-zinc-800 hover:bg-zinc-700 text-white"
+            >
+              Close
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                onClick={() => handleClose(false)}
+                disabled={isUploading}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpload}
+                disabled={pendingCount === 0 || isUploading}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload {pendingCount > 0 ? `(${pendingCount})` : ''}
+                  </>
+                )}
+              </Button>
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
