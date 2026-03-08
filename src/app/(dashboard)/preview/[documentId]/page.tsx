@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -11,13 +11,8 @@ import {
   Download,
   Star,
   Loader2,
-  ZoomIn,
-  ZoomOut,
-  Maximize,
   FileText,
   AlertCircle,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,8 +24,6 @@ import type { DocumentData } from '@/types/api';
 // Configure pdf.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-type ZoomLevel = 'fit' | number;
-
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
   if (!res.ok) {
@@ -40,17 +33,80 @@ async function fetchJson<T>(url: string): Promise<T> {
   return res.json();
 }
 
+function usePinchZoom(containerRef: React.RefObject<HTMLDivElement | null>) {
+  const [scale, setScale] = useState(1);
+  const baseScale = useRef(1);
+  const startDistance = useRef(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    function getDistance(t1: Touch, t2: Touch) {
+      const dx = t1.clientX - t2.clientX;
+      const dy = t1.clientY - t2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function onTouchStart(e: TouchEvent) {
+      if (e.touches.length === 2) {
+        startDistance.current = getDistance(e.touches[0], e.touches[1]);
+        baseScale.current = scale;
+      }
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const dist = getDistance(e.touches[0], e.touches[1]);
+        const newScale = Math.min(
+          Math.max(baseScale.current * (dist / startDistance.current), 0.5),
+          4
+        );
+        setScale(newScale);
+      }
+    }
+
+    // Use a variable to capture the current scale for the touchstart handler
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+    };
+  }, [containerRef, scale]);
+
+  const resetScale = useCallback(() => setScale(1), []);
+
+  return { scale, setScale, resetScale };
+}
+
 export default function PreviewPage() {
   const params = useParams<{ documentId: string }>();
   const router = useRouter();
   const documentId = params.documentId;
 
-  const [zoom, setZoom] = useState<ZoomLevel>('fit');
   const [numPages, setNumPages] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [pageWidth, setPageWidth] = useState(400);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scale, resetScale } = usePinchZoom(containerRef);
 
   const toggleFavorite = useToggleFavorite();
+
+  // Calculate page width based on container
+  useEffect(() => {
+    function updateWidth() {
+      if (containerRef.current) {
+        const w = containerRef.current.clientWidth - 16; // 8px padding each side
+        setPageWidth(Math.min(w, 900));
+      }
+    }
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
 
   // Fetch document metadata
   const {
@@ -102,27 +158,6 @@ export default function PreviewPage() {
       isFavorite: !document.isFavorite,
     });
   }, [document, toggleFavorite]);
-
-  const handleZoomIn = () => {
-    setZoom((prev) => {
-      const current = prev === 'fit' ? 100 : prev;
-      return Math.min(current + 25, 300);
-    });
-  };
-
-  const handleZoomOut = () => {
-    setZoom((prev) => {
-      const current = prev === 'fit' ? 100 : prev;
-      return Math.max(current - 25, 25);
-    });
-  };
-
-  const handleFitToScreen = () => setZoom('fit');
-
-  const getZoomPercent = (): number => {
-    if (zoom === 'fit') return 100;
-    return zoom;
-  };
 
   const handlePdfLoadSuccess = ({ numPages: n }: { numPages: number }) => {
     setNumPages(n);
@@ -185,6 +220,16 @@ export default function PreviewPage() {
         )}
 
         <div className="flex items-center gap-1 shrink-0">
+          {/* Show scale indicator + reset when zoomed */}
+          {scale !== 1 && (
+            <button
+              onClick={resetScale}
+              className="text-xs text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-800"
+            >
+              {Math.round(scale * 100)}% ✕
+            </button>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
@@ -212,67 +257,12 @@ export default function PreviewPage() {
         </div>
       </div>
 
-      {/* Zoom controls for images and PDFs */}
-      {(isImage || isPdf) && !isLoading && (
-        <div className="flex items-center justify-center gap-2 px-3 py-2 border-b border-zinc-800 bg-zinc-950 shrink-0">
-          {isPdf && numPages > 0 && (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage <= 1}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-xs text-zinc-400 min-w-[4rem] text-center">
-                {currentPage} / {numPages}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setCurrentPage((p) => Math.min(numPages, p + 1))}
-                disabled={currentPage >= numPages}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <div className="w-px h-5 bg-zinc-700 mx-1" />
-            </>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleFitToScreen}
-            className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
-          >
-            <Maximize className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleZoomOut}
-            className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </Button>
-          <span className="text-xs text-zinc-400 w-12 text-center">
-            {zoom === 'fit' ? 'Fit' : `${getZoomPercent()}%`}
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleZoomIn}
-            className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-
-      {/* Preview area */}
-      <div className="flex-1 overflow-auto bg-black">
+      {/* Preview area — pinch-to-zoom + scroll in all directions */}
+      <div
+        ref={containerRef}
+        className="flex-1 overflow-auto bg-black"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
@@ -291,56 +281,61 @@ export default function PreviewPage() {
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col items-center py-4 px-2">
-              <Document
-                file={`/api/documents/${documentId}/preview/proxy`}
-                onLoadSuccess={handlePdfLoadSuccess}
-                onLoadError={handlePdfLoadError}
-                loading={
-                  <div className="flex items-center justify-center py-20">
-                    <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
-                  </div>
-                }
-                className="flex flex-col items-center gap-4"
-              >
-                {Array.from(new Array(numPages), (_, index) => (
-                  <Page
-                    key={`page_${index + 1}`}
-                    pageNumber={index + 1}
-                    width={
-                      zoom === 'fit'
-                        ? Math.min(typeof window !== 'undefined' ? window.innerWidth - 32 : 400, 800)
-                        : (getZoomPercent() / 100) * 800
-                    }
-                    className="shadow-lg rounded-sm overflow-hidden"
-                    loading={
-                      <div className="flex items-center justify-center h-[400px] w-full bg-zinc-900 rounded-sm">
-                        <Loader2 className="h-6 w-6 text-zinc-500 animate-spin" />
-                      </div>
-                    }
-                  />
-                ))}
-              </Document>
+            <div
+              style={{
+                transform: `scale(${scale})`,
+                transformOrigin: 'top center',
+                minWidth: scale > 1 ? `${scale * 100}%` : undefined,
+              }}
+            >
+              <div className="flex flex-col items-center py-4 px-2 gap-3">
+                <Document
+                  file={`/api/documents/${documentId}/preview/proxy`}
+                  onLoadSuccess={handlePdfLoadSuccess}
+                  onLoadError={handlePdfLoadError}
+                  loading={
+                    <div className="flex items-center justify-center py-20">
+                      <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
+                    </div>
+                  }
+                  className="flex flex-col items-center gap-3"
+                >
+                  {Array.from(new Array(numPages), (_, index) => (
+                    <Page
+                      key={`page_${index + 1}`}
+                      pageNumber={index + 1}
+                      width={pageWidth}
+                      className="shadow-lg rounded-sm overflow-hidden"
+                      loading={
+                        <div className="flex items-center justify-center h-[500px] w-full bg-zinc-900 rounded-sm">
+                          <Loader2 className="h-6 w-6 text-zinc-500 animate-spin" />
+                        </div>
+                      }
+                    />
+                  ))}
+                </Document>
+                {numPages > 0 && (
+                  <p className="text-xs text-zinc-500 pb-4">
+                    {numPages} {numPages === 1 ? 'page' : 'pages'}
+                  </p>
+                )}
+              </div>
             </div>
           )
         ) : isImage && previewUrl ? (
-          <div className="flex items-center justify-center min-h-full p-4">
-            <div
-              className="max-w-4xl mx-auto"
-              style={
-                zoom === 'fit'
-                  ? { maxWidth: '100%', maxHeight: '100%' }
-                  : { width: `${getZoomPercent()}%` }
-              }
-            >
+          <div
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: 'top center',
+              minWidth: scale > 1 ? `${scale * 100}%` : undefined,
+            }}
+          >
+            <div className="flex items-center justify-center min-h-full p-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
                 alt={document?.name || 'Document preview'}
-                className={cn(
-                  'rounded-lg',
-                  zoom === 'fit' ? 'max-w-full max-h-[calc(100vh-10rem)] object-contain mx-auto' : 'w-full'
-                )}
+                className="max-w-full max-h-[calc(100vh-6rem)] object-contain rounded-lg"
               />
             </div>
           </div>
