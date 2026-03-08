@@ -3,6 +3,9 @@
 import { useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 import {
   ArrowLeft,
   Download,
@@ -13,6 +16,8 @@ import {
   Maximize,
   FileText,
   AlertCircle,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,7 +26,10 @@ import { useToggleFavorite } from '@/hooks/use-documents';
 import { cn } from '@/lib/utils';
 import type { DocumentData } from '@/types/api';
 
-type ZoomLevel = 'fit' | '100' | number;
+// Configure pdf.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+type ZoomLevel = 'fit' | number;
 
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -38,6 +46,9 @@ export default function PreviewPage() {
   const documentId = params.documentId;
 
   const [zoom, setZoom] = useState<ZoomLevel>('fit');
+  const [numPages, setNumPages] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   const toggleFavorite = useToggleFavorite();
 
@@ -80,7 +91,7 @@ export default function PreviewPage() {
       a.click();
       window.document.body.removeChild(a);
     } catch {
-      // Error handled silently — toast could be added later
+      // Error handled silently
     }
   }, [documentId, document?.name]);
 
@@ -94,14 +105,14 @@ export default function PreviewPage() {
 
   const handleZoomIn = () => {
     setZoom((prev) => {
-      const current = prev === 'fit' ? 100 : prev === '100' ? 100 : prev;
+      const current = prev === 'fit' ? 100 : prev;
       return Math.min(current + 25, 300);
     });
   };
 
   const handleZoomOut = () => {
     setZoom((prev) => {
-      const current = prev === 'fit' ? 100 : prev === '100' ? 100 : prev;
+      const current = prev === 'fit' ? 100 : prev;
       return Math.max(current - 25, 25);
     });
   };
@@ -109,8 +120,17 @@ export default function PreviewPage() {
   const handleFitToScreen = () => setZoom('fit');
 
   const getZoomPercent = (): number => {
-    if (zoom === 'fit' || zoom === '100') return 100;
+    if (zoom === 'fit') return 100;
     return zoom;
+  };
+
+  const handlePdfLoadSuccess = ({ numPages: n }: { numPages: number }) => {
+    setNumPages(n);
+    setPdfError(null);
+  };
+
+  const handlePdfLoadError = () => {
+    setPdfError('Failed to load PDF. Try downloading instead.');
   };
 
   const isImage = document?.mimeType.startsWith('image/');
@@ -192,9 +212,35 @@ export default function PreviewPage() {
         </div>
       </div>
 
-      {/* Zoom controls for images */}
-      {isImage && !isLoading && (
+      {/* Zoom controls for images and PDFs */}
+      {(isImage || isPdf) && !isLoading && (
         <div className="flex items-center justify-center gap-2 px-3 py-2 border-b border-zinc-800 bg-zinc-950 shrink-0">
+          {isPdf && numPages > 0 && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-xs text-zinc-400 min-w-[4rem] text-center">
+                {currentPage} / {numPages}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCurrentPage((p) => Math.min(numPages, p + 1))}
+                disabled={currentPage >= numPages}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <div className="w-px h-5 bg-zinc-700 mx-1" />
+            </>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -232,13 +278,51 @@ export default function PreviewPage() {
             <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
           </div>
         ) : isPdf && previewUrl ? (
-          <div className="w-full h-full max-w-4xl mx-auto">
-            <iframe
-              src={previewUrl}
-              className="w-full h-full border-0"
-              title={document?.name || 'PDF Preview'}
-            />
-          </div>
+          pdfError ? (
+            <div className="flex flex-col items-center justify-center h-full gap-4 p-4">
+              <FileText className="h-16 w-16 text-zinc-600" />
+              <p className="text-sm text-zinc-400 text-center">{pdfError}</p>
+              <Button
+                onClick={handleDownload}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download File
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center py-4 px-2">
+              <Document
+                file={`/api/documents/${documentId}/preview/proxy`}
+                onLoadSuccess={handlePdfLoadSuccess}
+                onLoadError={handlePdfLoadError}
+                loading={
+                  <div className="flex items-center justify-center py-20">
+                    <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
+                  </div>
+                }
+                className="flex flex-col items-center gap-4"
+              >
+                {Array.from(new Array(numPages), (_, index) => (
+                  <Page
+                    key={`page_${index + 1}`}
+                    pageNumber={index + 1}
+                    width={
+                      zoom === 'fit'
+                        ? Math.min(typeof window !== 'undefined' ? window.innerWidth - 32 : 400, 800)
+                        : (getZoomPercent() / 100) * 800
+                    }
+                    className="shadow-lg rounded-sm overflow-hidden"
+                    loading={
+                      <div className="flex items-center justify-center h-[400px] w-full bg-zinc-900 rounded-sm">
+                        <Loader2 className="h-6 w-6 text-zinc-500 animate-spin" />
+                      </div>
+                    }
+                  />
+                ))}
+              </Document>
+            </div>
+          )
         ) : isImage && previewUrl ? (
           <div className="flex items-center justify-center min-h-full p-4">
             <div
