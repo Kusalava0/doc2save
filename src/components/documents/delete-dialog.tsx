@@ -40,19 +40,19 @@ export function DeleteDocumentDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-zinc-950 border-zinc-800">
+      <AlertDialogContent className="bg-background border-border">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-white">
+          <AlertDialogTitle className="text-foreground">
             Delete Document
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-zinc-400">
+          <AlertDialogDescription className="text-muted-foreground">
             Are you sure you want to delete{' '}
-            <span className="font-medium text-zinc-300">{doc.name}</span>?
+            <span className="font-medium text-foreground/80">{doc.name}</span>?
             This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white">
+          <AlertDialogCancel className="bg-card border-border text-foreground/80 hover:bg-accent hover:text-foreground">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction

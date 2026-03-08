@@ -69,7 +69,7 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
         subscription_id: subscriptionId,
-        name: 'Doc2Save',
+        name: 'AptsWorks',
         description: `Monthly Subscription - Rs ${SUBSCRIPTION_AMOUNT}`,
         handler: () => {
           setCheckoutState('success');
@@ -118,33 +118,33 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-zinc-900 border-zinc-800 sm:max-w-md">
+      <DialogContent className="bg-card border-border sm:max-w-md">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600/20">
             <Crown className="h-6 w-6 text-blue-400" />
           </div>
-          <DialogTitle className="text-white text-lg">
+          <DialogTitle className="text-foreground text-lg">
             Upgrade to continue uploading
           </DialogTitle>
-          <DialogDescription className="text-zinc-400">
-            You have used your free upload. Subscribe to Doc2Save Pro for
+          <DialogDescription className="text-muted-foreground">
+            You have used your free upload. Subscribe to AptsWorks Pro for
             unlimited uploads.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 pt-2">
           <div className="text-center">
-            <span className="text-3xl font-bold text-white">
+            <span className="text-3xl font-bold text-foreground">
               Rs {SUBSCRIPTION_AMOUNT}
             </span>
-            <span className="text-zinc-400 ml-1">/month</span>
+            <span className="text-muted-foreground ml-1">/month</span>
           </div>
 
           <div className="space-y-2">
             {FEATURES.map((feature) => (
               <div
                 key={feature}
-                className="flex items-center gap-2 text-sm text-zinc-300"
+                className="flex items-center gap-2 text-sm text-foreground/80"
               >
                 <Check className="h-4 w-4 text-blue-500 shrink-0" />
                 {feature}
@@ -173,7 +173,7 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
             <Button
               variant="ghost"
               onClick={() => onOpenChange(false)}
-              className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+              className="text-muted-foreground hover:text-foreground hover:bg-accent"
             >
               Maybe later
             </Button>

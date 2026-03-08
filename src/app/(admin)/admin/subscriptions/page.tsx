@@ -74,7 +74,7 @@ function getStatusBadgeClasses(status: string): string {
     case 'HALTED':
       return 'bg-red-600/20 text-red-400 border-red-600/30';
     default:
-      return 'bg-zinc-800 text-zinc-400';
+      return 'bg-muted text-muted-foreground';
   }
 }
 
@@ -115,8 +115,8 @@ export default function AdminSubscriptionsPage() {
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <CreditCard className="h-6 w-6 text-zinc-400" />
-          <h1 className="text-2xl font-bold text-white">Subscriptions</h1>
+          <CreditCard className="h-6 w-6 text-muted-foreground" />
+          <h1 className="text-2xl font-bold text-foreground">Subscriptions</h1>
         </div>
 
         {/* Status filter */}
@@ -124,13 +124,13 @@ export default function AdminSubscriptionsPage() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+              className="border-border text-foreground/80 hover:bg-accent"
             >
               <Filter className="h-4 w-4 mr-2" />
               {statusFilter === 'ALL' ? 'All statuses' : statusFilter}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
+          <DropdownMenuContent className="bg-card border-border">
             {STATUS_OPTIONS.map((status) => (
               <DropdownMenuItem
                 key={status}
@@ -138,7 +138,7 @@ export default function AdminSubscriptionsPage() {
                   setStatusFilter(status);
                   setPage(1);
                 }}
-                className="text-zinc-300 focus:bg-zinc-800 focus:text-white"
+                className="text-foreground/80 focus:bg-accent focus:text-foreground"
               >
                 {status === 'ALL' ? 'All statuses' : status}
               </DropdownMenuItem>
@@ -147,35 +147,35 @@ export default function AdminSubscriptionsPage() {
         </DropdownMenu>
       </div>
 
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="bg-card border-border">
         <CardContent className="p-0">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+              <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
             </div>
           ) : error ? (
             <div className="flex items-center justify-center gap-2 py-12">
               <AlertCircle className="h-5 w-5 text-red-500" />
-              <p className="text-sm text-zinc-400">Failed to load subscriptions</p>
+              <p className="text-sm text-muted-foreground">Failed to load subscriptions</p>
             </div>
           ) : (
             <>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-zinc-800 hover:bg-transparent">
-                      <TableHead className="text-zinc-400">User Phone</TableHead>
-                      <TableHead className="text-zinc-400">Name</TableHead>
-                      <TableHead className="text-zinc-400">Status</TableHead>
-                      <TableHead className="text-zinc-400">Period End</TableHead>
+                    <TableRow className="border-border hover:bg-transparent">
+                      <TableHead className="text-muted-foreground">User Phone</TableHead>
+                      <TableHead className="text-muted-foreground">Name</TableHead>
+                      <TableHead className="text-muted-foreground">Status</TableHead>
+                      <TableHead className="text-muted-foreground">Period End</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {subscriptionUsers.length === 0 ? (
-                      <TableRow className="border-zinc-800">
+                      <TableRow className="border-border">
                         <TableCell
                           colSpan={4}
-                          className="text-center text-zinc-500 py-8"
+                          className="text-center text-muted-foreground py-8"
                         >
                           No subscriptions found
                         </TableCell>
@@ -184,12 +184,12 @@ export default function AdminSubscriptionsPage() {
                       subscriptionUsers.map((user) => (
                         <TableRow
                           key={user.id}
-                          className="border-zinc-800 hover:bg-zinc-800/50"
+                          className="border-border hover:bg-accent/50"
                         >
-                          <TableCell className="text-zinc-300 font-mono text-sm">
+                          <TableCell className="text-foreground/80 font-mono text-sm">
                             {user.phone}
                           </TableCell>
-                          <TableCell className="text-zinc-300">
+                          <TableCell className="text-foreground/80">
                             {user.name || '-'}
                           </TableCell>
                           <TableCell>
@@ -198,10 +198,10 @@ export default function AdminSubscriptionsPage() {
                                 {user.subscription.status}
                               </Badge>
                             ) : (
-                              <span className="text-zinc-500 text-sm">None</span>
+                              <span className="text-muted-foreground text-sm">None</span>
                             )}
                           </TableCell>
-                          <TableCell className="text-zinc-300 text-sm">
+                          <TableCell className="text-foreground/80 text-sm">
                             {formatDate(user.subscription?.currentPeriodEnd ?? null)}
                           </TableCell>
                         </TableRow>
@@ -213,15 +213,15 @@ export default function AdminSubscriptionsPage() {
 
               {/* Pagination */}
               {data && data.totalPages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t border-zinc-800">
-                  <p className="text-sm text-zinc-400">
+                <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+                  <p className="text-sm text-muted-foreground">
                     Page {data.page} of {data.totalPages}
                   </p>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                      className="h-8 w-8 border-border text-muted-foreground hover:bg-accent"
                       disabled={page <= 1}
                       onClick={() => setPage((p) => p - 1)}
                     >
@@ -230,7 +230,7 @@ export default function AdminSubscriptionsPage() {
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                      className="h-8 w-8 border-border text-muted-foreground hover:bg-accent"
                       disabled={page >= data.totalPages}
                       onClick={() => setPage((p) => p + 1)}
                     >

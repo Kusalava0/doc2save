@@ -56,8 +56,8 @@ export default function AdminRevenuePage() {
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <BarChart3 className="h-6 w-6 text-zinc-400" />
-          <h1 className="text-2xl font-bold text-white">Revenue</h1>
+          <BarChart3 className="h-6 w-6 text-muted-foreground" />
+          <h1 className="text-2xl font-bold text-foreground">Revenue</h1>
         </div>
 
         {/* Year selector */}
@@ -65,19 +65,19 @@ export default function AdminRevenuePage() {
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+            className="h-8 w-8 border-border text-muted-foreground hover:bg-accent"
             onClick={() => setYear((y) => y - 1)}
             disabled={year <= 2023}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-white font-medium w-12 text-center">
+          <span className="text-foreground font-medium w-12 text-center">
             {year}
           </span>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+            className="h-8 w-8 border-border text-muted-foreground hover:bg-accent"
             onClick={() => setYear((y) => y + 1)}
             disabled={year >= currentYear}
           >
@@ -88,9 +88,9 @@ export default function AdminRevenuePage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Annual Revenue ({year})
             </CardTitle>
             <div className="p-2 rounded-lg bg-green-600/10">
@@ -99,18 +99,18 @@ export default function AdminRevenuePage() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <Loader2 className="h-5 w-5 text-zinc-500 animate-spin" />
+              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
             ) : (
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(totalAnnualRevenue)}
               </p>
             )}
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-400">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Total Transactions ({year})
             </CardTitle>
             <div className="p-2 rounded-lg bg-blue-600/10">
@@ -119,9 +119,9 @@ export default function AdminRevenuePage() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <Loader2 className="h-5 w-5 text-zinc-500 animate-spin" />
+              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
             ) : (
-              <p className="text-2xl font-bold text-white">
+              <p className="text-2xl font-bold text-foreground">
                 {totalTransactions.toLocaleString()}
               </p>
             )}
@@ -131,9 +131,9 @@ export default function AdminRevenuePage() {
 
       {/* Revenue chart (simple bar visualization) */}
       {!isLoading && !error && data && (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="text-white text-base">
+            <CardTitle className="text-foreground text-base">
               Monthly Revenue
             </CardTitle>
           </CardHeader>
@@ -141,10 +141,10 @@ export default function AdminRevenuePage() {
             <div className="space-y-2">
               {data.revenue.map((month) => (
                 <div key={month.month} className="flex items-center gap-3">
-                  <span className="text-xs text-zinc-400 w-10 shrink-0">
+                  <span className="text-xs text-muted-foreground w-10 shrink-0">
                     {month.month.slice(0, 3)}
                   </span>
-                  <div className="flex-1 h-6 bg-zinc-800 rounded-md overflow-hidden">
+                  <div className="flex-1 h-6 bg-muted rounded-md overflow-hidden">
                     <div
                       className="h-full bg-blue-600 rounded-md transition-all duration-300"
                       style={{
@@ -155,7 +155,7 @@ export default function AdminRevenuePage() {
                       }}
                     />
                   </div>
-                  <span className="text-xs text-zinc-300 w-24 text-right shrink-0">
+                  <span className="text-xs text-foreground/80 w-24 text-right shrink-0">
                     {formatCurrency(month.total)}
                   </span>
                 </div>
@@ -166,27 +166,27 @@ export default function AdminRevenuePage() {
       )}
 
       {/* Revenue table */}
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="bg-card border-border">
         <CardContent className="p-0">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+              <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
             </div>
           ) : error ? (
             <div className="flex items-center justify-center gap-2 py-12">
               <AlertCircle className="h-5 w-5 text-red-500" />
-              <p className="text-sm text-zinc-400">Failed to load revenue data</p>
+              <p className="text-sm text-muted-foreground">Failed to load revenue data</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-zinc-800 hover:bg-transparent">
-                    <TableHead className="text-zinc-400">Month</TableHead>
-                    <TableHead className="text-zinc-400 text-right">
+                  <TableRow className="border-border hover:bg-transparent">
+                    <TableHead className="text-muted-foreground">Month</TableHead>
+                    <TableHead className="text-muted-foreground text-right">
                       Revenue
                     </TableHead>
-                    <TableHead className="text-zinc-400 text-right">
+                    <TableHead className="text-muted-foreground text-right">
                       Transactions
                     </TableHead>
                   </TableRow>
@@ -195,28 +195,28 @@ export default function AdminRevenuePage() {
                   {data?.revenue.map((month) => (
                     <TableRow
                       key={month.month}
-                      className="border-zinc-800 hover:bg-zinc-800/50"
+                      className="border-border hover:bg-accent/50"
                     >
-                      <TableCell className="text-zinc-300">
+                      <TableCell className="text-foreground/80">
                         {month.month}
                       </TableCell>
-                      <TableCell className="text-zinc-300 text-right font-mono">
+                      <TableCell className="text-foreground/80 text-right font-mono">
                         {formatCurrency(month.total)}
                       </TableCell>
-                      <TableCell className="text-zinc-300 text-right">
+                      <TableCell className="text-foreground/80 text-right">
                         {month.transactionCount}
                       </TableCell>
                     </TableRow>
                   ))}
                   {/* Total row */}
-                  <TableRow className="border-zinc-800 bg-zinc-800/30">
-                    <TableCell className="text-white font-semibold">
+                  <TableRow className="border-border bg-accent/50">
+                    <TableCell className="text-foreground font-semibold">
                       Total
                     </TableCell>
-                    <TableCell className="text-white font-semibold text-right font-mono">
+                    <TableCell className="text-foreground font-semibold text-right font-mono">
                       {formatCurrency(totalAnnualRevenue)}
                     </TableCell>
-                    <TableCell className="text-white font-semibold text-right">
+                    <TableCell className="text-foreground font-semibold text-right">
                       {totalTransactions}
                     </TableCell>
                   </TableRow>

@@ -32,16 +32,16 @@ export function Sidebar() {
   };
 
   return (
-    <div className="flex h-full w-60 flex-col bg-zinc-950 border-r border-zinc-800">
+    <div className="flex h-full w-60 flex-col bg-background border-r border-border">
       {/* Brand */}
       <div className="flex h-14 items-center gap-2 px-4">
         <FileText className="h-6 w-6 text-blue-500" />
-        <span className="text-lg font-bold text-white tracking-tight">
-          Doc2Save
+        <span className="text-lg font-bold text-foreground tracking-tight">
+          AptsWorks
         </span>
       </div>
 
-      <Separator className="bg-zinc-800" />
+      <Separator className="bg-border" />
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-2 py-3">
@@ -57,8 +57,8 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-zinc-800/50 text-white'
-                  : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
+                  ? 'bg-accent/50 text-foreground'
+                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
               )}
             >
               <item.icon className="h-4 w-4 shrink-0" />
@@ -70,22 +70,22 @@ export function Sidebar() {
 
       {/* Bottom section */}
       <div className="mt-auto space-y-2 px-2 pb-3">
-        <Separator className="bg-zinc-800 mb-2" />
+        <Separator className="bg-border mb-2" />
 
         {/* Subscription badge */}
         <Link
           href="/subscription"
-          className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-zinc-800/50 transition-colors"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-accent/50 transition-colors"
         >
-          <Shield className="h-4 w-4 text-zinc-400" />
-          <span className="text-sm text-zinc-400">Plan</span>
+          <Shield className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Plan</span>
           <Badge
             variant="secondary"
             className={cn(
               'ml-auto text-xs',
               isActive
                 ? 'bg-green-900/50 text-green-400 border border-green-800'
-                : 'bg-zinc-800 text-zinc-300'
+                : 'bg-muted text-foreground/80'
             )}
           >
             {planLabel}
@@ -95,10 +95,10 @@ export function Sidebar() {
         {/* User info */}
         {user && (
           <div className="flex items-center gap-2 rounded-lg px-3 py-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-800 text-xs text-white">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs text-foreground">
               {user.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
-            <span className="text-sm text-zinc-300 truncate">
+            <span className="text-sm text-foreground/80 truncate">
               {user.name || user.phone || user.email}
             </span>
           </div>
@@ -107,7 +107,7 @@ export function Sidebar() {
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800/50 hover:text-white transition-colors"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
         >
           <LogOut className="h-4 w-4" />
           Log out

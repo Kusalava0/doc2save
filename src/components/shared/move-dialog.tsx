@@ -95,12 +95,12 @@ export function MoveDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-zinc-950 border-zinc-800 max-w-md">
+      <DialogContent className="bg-background border-border max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white">
+          <DialogTitle className="text-foreground">
             Move {itemType === 'document' ? 'Document' : 'Folder'}
           </DialogTitle>
-          <DialogDescription className="text-zinc-400">
+          <DialogDescription className="text-muted-foreground">
             Select a destination folder.
           </DialogDescription>
         </DialogHeader>
@@ -117,8 +117,8 @@ export function MoveDialog({
                 className={cn(
                   'px-1.5 py-0.5 rounded text-xs transition-colors',
                   i === breadcrumbs.length - 1
-                    ? 'text-white font-medium'
-                    : 'text-zinc-400 hover:text-white'
+                    ? 'text-foreground font-medium'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 {crumb.id === null ? (
@@ -135,25 +135,25 @@ export function MoveDialog({
         </div>
 
         {/* Folder list */}
-        <div className="border border-zinc-800 rounded-lg min-h-[200px] max-h-[300px] overflow-y-auto">
+        <div className="border border-border rounded-lg min-h-[200px] max-h-[300px] overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center h-[200px]">
-              <Loader2 className="h-5 w-5 text-zinc-400 animate-spin" />
+              <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
             </div>
           ) : folders.length === 0 ? (
-            <div className="flex items-center justify-center h-[200px] text-sm text-zinc-500">
+            <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">
               No subfolders here
             </div>
           ) : (
-            <div className="divide-y divide-zinc-800">
+            <div className="divide-y divide-border">
               {folders.map((folder) => (
                 <button
                   key={folder.id}
                   onClick={() => navigateInto(folder.id, folder.name)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-zinc-900 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-card transition-colors text-left"
                 >
                   <Folder className="h-4 w-4 text-blue-400 shrink-0" />
-                  <span className="text-sm text-white truncate flex-1">
+                  <span className="text-sm text-foreground truncate flex-1">
                     {folder.name}
                   </span>
                   <ChevronRight className="h-4 w-4 text-zinc-600 shrink-0" />
@@ -167,7 +167,7 @@ export function MoveDialog({
           <Button
             variant="outline"
             onClick={() => handleClose(false)}
-            className="border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+            className="border-border text-foreground/80 hover:bg-accent hover:text-foreground"
           >
             Cancel
           </Button>

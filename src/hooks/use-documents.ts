@@ -57,6 +57,20 @@ export function useSearchDocuments(query: string) {
   });
 }
 
+export function useGlobalSearch(query: string) {
+  return useQuery({
+    queryKey: ['global-search', query] as const,
+    queryFn: async () => {
+      const res = await fetchJson<{
+        documents: DocumentData[];
+        folders: import('@/types/api').FolderData[];
+      }>(`/api/documents/search?q=${encodeURIComponent(query)}`);
+      return res;
+    },
+    enabled: query.length >= 2,
+  });
+}
+
 export function useDeleteDocument() {
   const queryClient = useQueryClient();
 

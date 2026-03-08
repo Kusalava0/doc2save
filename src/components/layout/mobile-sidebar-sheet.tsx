@@ -24,7 +24,7 @@ export function MobileSidebarSheet() {
       <SheetContent
         side="left"
         showCloseButton={false}
-        className="w-60 p-0 bg-zinc-950 border-zinc-800"
+        className="w-60 p-0 bg-background border-border"
       >
         <SheetTitle className="sr-only">Navigation</SheetTitle>
         <Sidebar />

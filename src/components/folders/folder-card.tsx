@@ -49,9 +49,9 @@ export function FolderCard({ folder }: FolderCardProps) {
 
   const mobileSheet = (
     <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-      <SheetContent side="bottom" className="bg-zinc-900 border-zinc-800 px-0 pb-8">
+      <SheetContent side="bottom" className="bg-card border-border px-0 pb-8">
         <SheetHeader className="px-4 pb-2">
-          <SheetTitle className="text-white text-sm truncate text-left">
+          <SheetTitle className="text-foreground text-sm truncate text-left">
             {folder.name}
           </SheetTitle>
         </SheetHeader>
@@ -64,18 +64,18 @@ export function FolderCard({ folder }: FolderCardProps) {
                 currentName: folder.name,
               })
             )}
-            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-800 active:bg-zinc-800 transition-colors"
+            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-foreground/80 hover:bg-accent active:bg-accent transition-colors"
           >
-            <Edit2 className="h-5 w-5 text-zinc-400" />
+            <Edit2 className="h-5 w-5 text-muted-foreground" />
             Rename
           </button>
           <button
             onClick={handleMenuAction(() =>
               openModal({ type: 'move-folder', folderId: folder.id })
             )}
-            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-800 active:bg-zinc-800 transition-colors"
+            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-foreground/80 hover:bg-accent active:bg-accent transition-colors"
           >
-            <Move className="h-5 w-5 text-zinc-400" />
+            <Move className="h-5 w-5 text-muted-foreground" />
             Move
           </button>
           <button
@@ -86,7 +86,7 @@ export function FolderCard({ folder }: FolderCardProps) {
                 folderName: folder.name,
               })
             )}
-            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-400 hover:bg-zinc-800 active:bg-zinc-800 transition-colors"
+            className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-400 hover:bg-accent active:bg-accent transition-colors"
           >
             <Trash2 className="h-5 w-5" />
             Delete
@@ -102,14 +102,14 @@ export function FolderCard({ folder }: FolderCardProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-zinc-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+          className="h-8 w-8 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
         >
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="bg-zinc-900 border-zinc-800"
+        className="bg-card border-border"
       >
         <DropdownMenuItem
           onClick={(e) => {
@@ -120,7 +120,7 @@ export function FolderCard({ folder }: FolderCardProps) {
               currentName: folder.name,
             });
           }}
-          className="text-zinc-300 focus:text-white focus:bg-zinc-800"
+          className="text-foreground/80 focus:text-foreground focus:bg-accent"
         >
           <Edit2 className="h-4 w-4 mr-2" />
           Rename
@@ -130,7 +130,7 @@ export function FolderCard({ folder }: FolderCardProps) {
             e.stopPropagation();
             openModal({ type: 'move-folder', folderId: folder.id });
           }}
-          className="text-zinc-300 focus:text-white focus:bg-zinc-800"
+          className="text-foreground/80 focus:text-foreground focus:bg-accent"
         >
           <Move className="h-4 w-4 mr-2" />
           Move
@@ -144,7 +144,7 @@ export function FolderCard({ folder }: FolderCardProps) {
               folderName: folder.name,
             });
           }}
-          className="text-red-400 focus:text-red-300 focus:bg-zinc-800"
+          className="text-red-400 focus:text-red-300 focus:bg-accent"
         >
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
@@ -156,21 +156,21 @@ export function FolderCard({ folder }: FolderCardProps) {
   return (
     <div
       onClick={handleClick}
-      className="group flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 hover:border-zinc-700 transition-colors cursor-pointer"
+      className="group flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 hover:border-border transition-colors cursor-pointer"
     >
-      <div className="h-9 w-9 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
+      <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
         <Folder className="h-5 w-5 text-blue-400" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white truncate">{folder.name}</p>
-        <p className="text-xs text-zinc-500">
+        <p className="text-sm font-medium text-foreground truncate">{folder.name}</p>
+        <p className="text-xs text-muted-foreground">
           {totalItems} {totalItems === 1 ? 'item' : 'items'}
         </p>
       </div>
       {totalItems > 0 && (
         <Badge
           variant="secondary"
-          className="bg-zinc-800 text-zinc-400 border-0 text-xs"
+          className="bg-muted text-muted-foreground border-0 text-xs"
         >
           {totalItems}
         </Badge>
@@ -183,7 +183,7 @@ export function FolderCard({ folder }: FolderCardProps) {
             e.stopPropagation();
             setSheetOpen(true);
           }}
-          className="h-8 w-8 text-zinc-500 hover:text-white"
+          className="h-8 w-8 text-muted-foreground hover:text-foreground"
         >
           <MoreVertical className="h-4 w-4" />
         </Button>

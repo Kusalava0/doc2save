@@ -99,53 +99,53 @@ export default function SettingsPage() {
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-2xl">
       <div className="flex items-center gap-2">
-        <Settings className="h-6 w-6 text-zinc-400" />
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <Settings className="h-6 w-6 text-muted-foreground" />
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
       </div>
 
       {/* Profile section */}
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white">Profile</CardTitle>
-          <CardDescription className="text-zinc-400">
+          <CardTitle className="text-foreground">Profile</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Update your account information.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-300">Name</label>
+            <label className="text-sm font-medium text-foreground/80">Name</label>
             <div className="flex gap-2">
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your name"
-                className="bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600"
+                className="bg-background border-border text-foreground placeholder:text-zinc-600"
               />
               <Button
                 onClick={handleSaveName}
                 disabled={saving || !name.trim() || name.trim() === user?.name}
-                className="bg-white text-black hover:bg-zinc-200 shrink-0"
+                className="bg-white text-black hover:bg-accent shrink-0"
               >
                 {saving ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </div>
-          <Separator className="bg-zinc-800" />
+          <Separator className="bg-muted" />
           <div>
-            <label className="text-sm font-medium text-zinc-400">Phone</label>
+            <label className="text-sm font-medium text-muted-foreground">Phone</label>
             <div className="flex items-center gap-2 mt-1">
-              <Smartphone className="h-4 w-4 text-zinc-500" />
-              <p className="text-white">{user?.phone || profile?.phone || 'Not set'}</p>
+              <Smartphone className="h-4 w-4 text-muted-foreground" />
+              <p className="text-foreground">{user?.phone || profile?.phone || 'Not set'}</p>
             </div>
           </div>
           {(user?.email || profile?.email) && (
             <>
-              <Separator className="bg-zinc-800" />
+              <Separator className="bg-muted" />
               <div>
-                <label className="text-sm font-medium text-zinc-400">Email</label>
+                <label className="text-sm font-medium text-muted-foreground">Email</label>
                 <div className="flex items-center gap-2 mt-1">
-                  <Mail className="h-4 w-4 text-zinc-500" />
-                  <p className="text-white">{user?.email || profile?.email}</p>
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-foreground">{user?.email || profile?.email}</p>
                 </div>
               </div>
             </>
@@ -154,24 +154,24 @@ export default function SettingsPage() {
       </Card>
 
       {/* Linked Accounts */}
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <Link2 className="h-5 w-5" />
             Linked Accounts
           </CardTitle>
-          <CardDescription className="text-zinc-400">
+          <CardDescription className="text-muted-foreground">
             Link multiple sign-in methods to access your account.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Phone */}
-          <div className="flex items-center justify-between rounded-lg border border-zinc-800 p-3">
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div className="flex items-center gap-3">
-              <Smartphone className="h-5 w-5 text-zinc-400" />
+              <Smartphone className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium text-white">Phone Number</p>
-                <p className="text-xs text-zinc-500">
+                <p className="text-sm font-medium text-foreground">Phone Number</p>
+                <p className="text-xs text-muted-foreground">
                   {profile?.hasPhone || user?.phone
                     ? user?.phone || profile?.phone
                     : 'Not linked'}
@@ -189,7 +189,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Google */}
-          <div className="flex items-center justify-between rounded-lg border border-zinc-800 p-3">
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div className="flex items-center gap-3">
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path
@@ -210,8 +210,8 @@ export default function SettingsPage() {
                 />
               </svg>
               <div>
-                <p className="text-sm font-medium text-white">Google</p>
-                <p className="text-xs text-zinc-500">
+                <p className="text-sm font-medium text-foreground">Google</p>
+                <p className="text-xs text-muted-foreground">
                   {profile?.hasGoogle || user?.email
                     ? user?.email || profile?.email
                     : 'Not linked'}
@@ -229,7 +229,7 @@ export default function SettingsPage() {
                 variant="outline"
                 onClick={handleLinkGoogle}
                 disabled={linkingGoogle}
-                className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white text-xs h-8"
+                className="border-border text-foreground/80 hover:bg-accent hover:text-foreground text-xs h-8"
               >
                 {linkingGoogle ? 'Linking...' : 'Link Google'}
               </Button>
@@ -239,10 +239,10 @@ export default function SettingsPage() {
       </Card>
 
       {/* Subscription */}
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white">Subscription</CardTitle>
-          <CardDescription className="text-zinc-400">
+          <CardTitle className="text-foreground">Subscription</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Manage your subscription plan.
           </CardDescription>
         </CardHeader>
@@ -250,7 +250,7 @@ export default function SettingsPage() {
           <Button
             asChild
             variant="outline"
-            className="border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+            className="border-border text-foreground/80 hover:bg-accent hover:text-foreground"
           >
             <Link href="/subscription">
               <CreditCard className="h-4 w-4 mr-2" />
@@ -261,9 +261,9 @@ export default function SettingsPage() {
       </Card>
 
       {/* Danger Zone */}
-      <Card className="bg-zinc-900 border-red-900/30">
+      <Card className="bg-card border-red-900/30">
         <CardHeader>
-          <CardTitle className="text-white">Account</CardTitle>
+          <CardTitle className="text-foreground">Account</CardTitle>
         </CardHeader>
         <CardContent>
           <Button

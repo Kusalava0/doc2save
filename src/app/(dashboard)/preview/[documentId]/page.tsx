@@ -28,7 +28,7 @@ const PdfViewer = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
+        <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
       </div>
     ),
   },
@@ -203,14 +203,14 @@ export default function PreviewPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4 gap-4">
         <AlertCircle className="h-12 w-12 text-red-500" />
-        <h2 className="text-lg font-semibold text-white">Document not found</h2>
-        <p className="text-sm text-zinc-400 text-center max-w-md">
+        <h2 className="text-lg font-semibold text-foreground">Document not found</h2>
+        <p className="text-sm text-muted-foreground text-center max-w-md">
           {error instanceof Error ? error.message : 'Failed to load document'}
         </p>
         <Button
           variant="outline"
           onClick={() => router.back()}
-          className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+          className="border-border text-foreground/80 hover:bg-accent"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Go back
@@ -222,20 +222,20 @@ export default function PreviewPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Top bar */}
-      <div className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-3 border-b border-zinc-800 bg-zinc-950 shrink-0">
+      <div className="flex items-center gap-2 px-3 py-2 md:px-4 md:py-3 border-b border-border bg-background shrink-0">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
-          className="text-zinc-400 hover:text-white hover:bg-zinc-800 shrink-0"
+          className="text-muted-foreground hover:text-foreground hover:bg-accent shrink-0"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
 
         {isLoading ? (
-          <Skeleton className="h-5 w-48 bg-zinc-800" />
+          <Skeleton className="h-5 w-48 bg-muted" />
         ) : (
-          <h1 className="text-sm md:text-base font-medium text-white truncate flex-1 min-w-0">
+          <h1 className="text-sm md:text-base font-medium text-foreground truncate flex-1 min-w-0">
             {document?.name}
           </h1>
         )}
@@ -246,7 +246,7 @@ export default function PreviewPage() {
             size="icon"
             onClick={handleFavoriteToggle}
             disabled={!document || toggleFavorite.isPending}
-            className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent"
           >
             <Star
               className={cn(
@@ -261,7 +261,7 @@ export default function PreviewPage() {
             size="icon"
             onClick={handleDownload}
             disabled={!document}
-            className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent"
           >
             <Download className="h-5 w-5" />
           </Button>
@@ -270,20 +270,20 @@ export default function PreviewPage() {
 
       {/* Zoom toolbar */}
       {showZoomControls && (
-        <div className="flex items-center justify-center gap-1.5 px-3 py-2 border-b border-zinc-800 bg-zinc-950 shrink-0">
+        <div className="flex items-center justify-center gap-1.5 px-3 py-2 border-b border-border bg-background shrink-0">
           <Button
             variant="ghost"
             size="icon"
             onClick={handleZoomOut}
             disabled={zoom <= 0.5}
-            className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent h-8 w-8"
           >
             <ZoomOut className="h-4 w-4" />
           </Button>
 
           <button
             onClick={handleFitToWidth}
-            className="text-xs text-zinc-400 hover:text-white px-2.5 py-1 rounded hover:bg-zinc-800 min-w-[3.5rem] text-center"
+            className="text-xs text-muted-foreground hover:text-foreground px-2.5 py-1 rounded hover:bg-accent min-w-[3.5rem] text-center"
           >
             {Math.round(zoom * 100)}%
           </button>
@@ -293,19 +293,19 @@ export default function PreviewPage() {
             size="icon"
             onClick={handleZoomIn}
             disabled={zoom >= 4}
-            className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
+            className="text-muted-foreground hover:text-foreground hover:bg-accent h-8 w-8"
           >
             <ZoomIn className="h-4 w-4" />
           </Button>
 
           {zoom !== 1 && (
             <>
-              <div className="w-px h-5 bg-zinc-700 mx-1" />
+              <div className="w-px h-5 bg-border mx-1" />
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleFitToWidth}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent h-8 w-8"
                 title="Fit to width"
               >
                 <Maximize className="h-4 w-4" />
@@ -315,8 +315,8 @@ export default function PreviewPage() {
 
           {isPdf && pageCount > 0 && (
             <>
-              <div className="w-px h-5 bg-zinc-700 mx-1" />
-              <span className="text-xs text-zinc-500">
+              <div className="w-px h-5 bg-border mx-1" />
+              <span className="text-xs text-muted-foreground">
                 {pageCount} {pageCount === 1 ? 'page' : 'pages'}
               </span>
             </>
@@ -327,12 +327,12 @@ export default function PreviewPage() {
       {/* Preview area — scrolls in both directions when zoomed */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto bg-black"
+        className="flex-1 overflow-auto bg-background"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
+            <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
           </div>
         ) : isPdf ? (
           <PdfViewer
@@ -364,8 +364,8 @@ export default function PreviewPage() {
         ) : isDocx ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 p-4">
             <FileText className="h-16 w-16 text-zinc-600" />
-            <h2 className="text-lg font-medium text-white">DOCX Preview</h2>
-            <p className="text-sm text-zinc-400 text-center max-w-sm">
+            <h2 className="text-lg font-medium text-foreground">DOCX Preview</h2>
+            <p className="text-sm text-muted-foreground text-center max-w-sm">
               DOCX preview is not yet supported. Download the file to view it in
               your preferred application.
             </p>
@@ -380,7 +380,7 @@ export default function PreviewPage() {
         ) : (
           <div className="flex flex-col items-center justify-center h-full gap-4 p-4">
             <FileText className="h-16 w-16 text-zinc-600" />
-            <p className="text-sm text-zinc-400">Unable to preview this file</p>
+            <p className="text-sm text-muted-foreground">Unable to preview this file</p>
             <Button
               onClick={handleDownload}
               className="bg-blue-600 hover:bg-blue-700 text-white"

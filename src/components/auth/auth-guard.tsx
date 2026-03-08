@@ -58,17 +58,17 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   // Loading / idle / checking state
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-black">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background">
       <div className="space-y-4 text-center">
-        <h1 className="text-xl font-bold tracking-tight text-white">
-          Doc2Save
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
+          AptsWorks
         </h1>
         <div className="flex items-center justify-center gap-2">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-zinc-500" />
-          <div className="h-2 w-2 animate-pulse rounded-full bg-zinc-500 [animation-delay:150ms]" />
-          <div className="h-2 w-2 animate-pulse rounded-full bg-zinc-500 [animation-delay:300ms]" />
+          <div className="h-2 w-2 animate-pulse rounded-full bg-muted-foreground" />
+          <div className="h-2 w-2 animate-pulse rounded-full bg-muted-foreground [animation-delay:150ms]" />
+          <div className="h-2 w-2 animate-pulse rounded-full bg-muted-foreground [animation-delay:300ms]" />
         </div>
-        <p className="text-sm text-zinc-500">Loading...</p>
+        <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
     </div>
   );

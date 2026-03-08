@@ -261,9 +261,9 @@ export function UploadDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-zinc-950 border-zinc-800 text-white sm:max-w-lg">
+      <DialogContent className="bg-background border-border text-foreground sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-white">Upload Documents</DialogTitle>
+          <DialogTitle className="text-foreground">Upload Documents</DialogTitle>
         </DialogHeader>
 
         {/* Drop zone */}
@@ -272,19 +272,19 @@ export function UploadDialog({
           className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
             isDragActive
               ? 'border-blue-500 bg-blue-500/10'
-              : 'border-zinc-700 hover:border-zinc-600'
+              : 'border-border hover:border-zinc-600'
           } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
         >
           <input {...getInputProps()} />
-          <Upload className="h-8 w-8 text-zinc-500 mx-auto mb-3" />
+          <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
           {isDragActive ? (
             <p className="text-sm text-blue-400">Drop files here...</p>
           ) : (
             <>
-              <p className="text-sm text-zinc-300 mb-1">
+              <p className="text-sm text-foreground/80 mb-1">
                 Drag & drop files here, or click to browse
               </p>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-muted-foreground">
                 PDF, JPEG, PNG, HEIC, DOCX up to 50MB
               </p>
             </>
@@ -297,15 +297,15 @@ export function UploadDialog({
             {files.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-3 rounded-lg bg-zinc-900 px-3 py-2.5"
+                className="flex items-center gap-3 rounded-lg bg-card px-3 py-2.5"
               >
                 <FileIcon mimeType={item.file.type} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white truncate">
+                  <p className="text-sm text-foreground truncate">
                     {item.file.name}
                   </p>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-muted-foreground">
                       {formatFileSize(item.file.size)}
                     </span>
                     {item.status === 'uploading' && (
@@ -331,7 +331,7 @@ export function UploadDialog({
                     item.status === 'confirming') && (
                     <Progress
                       value={item.progress}
-                      className="h-1 mt-1 bg-zinc-800 [&>div]:bg-blue-500"
+                      className="h-1 mt-1 bg-muted [&>div]:bg-blue-500"
                     />
                   )}
                 </div>
@@ -342,21 +342,21 @@ export function UploadDialog({
                     item.status === 'confirming' ? (
                     <button
                       onClick={() => removeFile(item.id)}
-                      className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white"
+                      className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   ) : item.status === 'error' ? (
                     <button
                       onClick={() => removeFile(item.id)}
-                      className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white"
+                      className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   ) : (
                     <button
                       onClick={() => removeFile(item.id)}
-                      className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white"
+                      className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -372,7 +372,7 @@ export function UploadDialog({
           {allDone ? (
             <Button
               onClick={() => handleClose(false)}
-              className="bg-zinc-800 hover:bg-zinc-700 text-white"
+              className="bg-muted hover:bg-border text-foreground"
             >
               Close
             </Button>
@@ -382,7 +382,7 @@ export function UploadDialog({
                 variant="ghost"
                 onClick={() => handleClose(false)}
                 disabled={isUploading}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent"
               >
                 Cancel
               </Button>

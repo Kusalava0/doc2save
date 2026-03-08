@@ -259,12 +259,12 @@ export default function LoginPage() {
 
   return (
     <>
-      <Card className="border-zinc-800 bg-zinc-900">
+      <Card className="border-border bg-card">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-lg font-semibold text-white">
+          <CardTitle className="text-lg font-semibold text-foreground">
             {step === 'phone' ? 'Sign in' : 'Verify OTP'}
           </CardTitle>
-          <CardDescription className="text-zinc-400">
+          <CardDescription className="text-muted-foreground">
             {step === 'phone'
               ? 'Enter your phone number to get started'
               : `OTP sent to +91 ${phone}`}
@@ -282,12 +282,12 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <label
                   htmlFor="phone"
-                  className="text-sm font-medium text-zinc-300"
+                  className="text-sm font-medium text-foreground/80"
                 >
                   Phone number
                 </label>
                 <div className="flex gap-2">
-                  <div className="flex h-10 items-center rounded-md border border-zinc-800 bg-zinc-950 px-3 text-sm text-zinc-400">
+                  <div className="flex h-10 items-center rounded-md border border-border bg-background px-3 text-sm text-muted-foreground">
                     +91
                   </div>
                   <Input
@@ -307,7 +307,7 @@ export default function LoginPage() {
                       setPhone(val.slice(0, 10));
                       setLocalError('');
                     }}
-                    className="border-zinc-800 bg-zinc-950 text-white placeholder:text-zinc-600 focus-visible:ring-zinc-700"
+                    className="border-border bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
                     autoFocus
                     autoComplete="tel-national"
                   />
@@ -317,17 +317,17 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={sending || phone.length !== 10}
-                className="w-full bg-white text-black hover:bg-zinc-200 disabled:opacity-50"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               >
                 {sending ? 'Sending OTP...' : 'Continue'}
               </Button>
 
               <div className="relative my-2">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-zinc-800" />
+                  <span className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-zinc-900 px-2 text-zinc-500">or</span>
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
                 </div>
               </div>
 
@@ -336,7 +336,7 @@ export default function LoginPage() {
                 variant="outline"
                 disabled={googleLoading}
                 onClick={handleGoogleSignIn}
-                className="w-full border-zinc-700 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 hover:text-white disabled:opacity-50"
+                className="w-full border-border bg-background text-foreground/80 hover:bg-accent hover:text-foreground disabled:opacity-50"
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path
@@ -370,7 +370,7 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <label
                   htmlFor="otp"
-                  className="text-sm font-medium text-zinc-300"
+                  className="text-sm font-medium text-foreground/80"
                 >
                   Verification code
                 </label>
@@ -385,7 +385,7 @@ export default function LoginPage() {
                     setOtp(val);
                     setLocalError('');
                   }}
-                  className="border-zinc-800 bg-zinc-950 text-center text-lg tracking-[0.5em] text-white placeholder:text-zinc-600 focus-visible:ring-zinc-700"
+                  className="border-border bg-background text-center text-lg tracking-[0.5em] text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
                   autoFocus
                   autoComplete="one-time-code"
                 />
@@ -394,7 +394,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={verifying || otp.length !== 6}
-                className="w-full bg-white text-black hover:bg-zinc-200 disabled:opacity-50"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               >
                 {verifying ? 'Verifying...' : 'Verify'}
               </Button>
@@ -410,7 +410,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleResendOtp}
                   disabled={resendCooldown > 0 || sending}
-                  className="text-zinc-400 hover:text-zinc-300 disabled:text-zinc-600"
+                  className="text-muted-foreground hover:text-foreground/80 disabled:text-muted-foreground/50"
                 >
                   {resendCooldown > 0
                     ? `Resend in ${resendCooldown}s`
@@ -424,7 +424,7 @@ export default function LoginPage() {
         </CardContent>
       </Card>
 
-      <p className="mt-6 text-center text-xs text-zinc-600">
+      <p className="mt-6 text-center text-xs text-muted-foreground/60">
         By continuing, you agree to our Terms of Service and Privacy Policy.
       </p>
 

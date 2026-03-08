@@ -131,7 +131,7 @@ export function PdfViewer({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 text-zinc-400 animate-spin" />
+        <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
       </div>
     );
   }
@@ -140,7 +140,7 @@ export function PdfViewer({
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-4">
         <FileText className="h-16 w-16 text-zinc-600" />
-        <p className="text-sm text-zinc-400 text-center">{error}</p>
+        <p className="text-sm text-muted-foreground text-center">{error}</p>
         <Button
           onClick={onDownload}
           className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -162,7 +162,7 @@ export function PdfViewer({
         />
       ))}
       {numPages > 0 && (
-        <p className="text-xs text-zinc-500 pb-4">
+        <p className="text-xs text-muted-foreground pb-4">
           {numPages} {numPages === 1 ? 'page' : 'pages'}
         </p>
       )}

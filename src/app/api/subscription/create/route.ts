@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma/client';
 import { razorpay } from '@/lib/razorpay/client';
-import { PLANS, MONTHLY_PLAN } from '@/lib/razorpay/plans';
+import { PLAN, PLANS } from '@/lib/razorpay/plans';
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Resolve which plan to use (by name, since plan IDs are server-only env vars)
     const plan = requestedPlanName
       ? PLANS.find((p) => p.name === requestedPlanName)
-      : MONTHLY_PLAN;
+      : PLAN;
 
     if (!plan) {
       return NextResponse.json(
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Razorpay subscription
-    const totalCount = plan.period === 'yearly' ? 5 : 12;
+    const totalCount = 12;
     const razorpaySubscription = await razorpay.subscriptions.create({
       plan_id: plan.id,
       total_count: totalCount,

@@ -26,17 +26,17 @@ export default function FolderPage() {
   if (isLoading) {
     return (
       <div className="p-4 md:p-6 space-y-6">
-        <Skeleton className="h-5 w-48 bg-zinc-800" />
+        <Skeleton className="h-5 w-48 bg-muted" />
         <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-40 bg-zinc-800" />
+          <Skeleton className="h-8 w-40 bg-muted" />
           <div className="flex gap-2">
-            <Skeleton className="h-9 w-28 bg-zinc-800 rounded-lg" />
-            <Skeleton className="h-9 w-24 bg-zinc-800 rounded-lg" />
+            <Skeleton className="h-9 w-28 bg-muted rounded-lg" />
+            <Skeleton className="h-9 w-24 bg-muted rounded-lg" />
           </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-xl bg-zinc-900" />
+            <Skeleton key={i} className="h-28 rounded-xl bg-card" />
           ))}
         </div>
       </div>
@@ -46,11 +46,11 @@ export default function FolderPage() {
   if (isError || !data) {
     return (
       <div className="p-4 md:p-6">
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-20">
-          <h3 className="text-lg font-medium text-white mb-1">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20">
+          <h3 className="text-lg font-medium text-foreground mb-1">
             Folder not found
           </h3>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             This folder may have been deleted or moved.
           </p>
         </div>
@@ -65,16 +65,16 @@ export default function FolderPage() {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">{data.folder.name}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{data.folder.name}</h1>
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center rounded-lg border border-zinc-800 p-0.5">
+          <div className="hidden sm:flex items-center rounded-lg border border-border p-0.5">
             <button
               onClick={() => setViewMode('grid')}
               className={cn(
                 'rounded-md p-1.5 transition-colors',
                 viewMode === 'grid'
-                  ? 'bg-zinc-800 text-white'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground/80'
               )}
             >
               <Grid3X3 className="h-4 w-4" />
@@ -84,8 +84,8 @@ export default function FolderPage() {
               className={cn(
                 'rounded-md p-1.5 transition-colors',
                 viewMode === 'list'
-                  ? 'bg-zinc-800 text-white'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground/80'
               )}
             >
               <List className="h-4 w-4" />
@@ -95,7 +95,7 @@ export default function FolderPage() {
           <Button
             variant="outline"
             onClick={() => setCreateFolderOpen(true)}
-            className="border-zinc-800 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+            className="border-border bg-card text-foreground/80 hover:bg-accent hover:text-foreground"
           >
             <FolderPlus className="h-4 w-4 mr-2" />
             <span className="hidden sm:inline">New Folder</span>
@@ -114,7 +114,7 @@ export default function FolderPage() {
       {/* Subfolders */}
       {data.subfolders.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-sm font-medium text-zinc-400">Folders</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Folders</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {data.subfolders.map((folder) => (
               <FolderCard key={folder.id} folder={folder} />
@@ -126,7 +126,7 @@ export default function FolderPage() {
       {/* Documents */}
       <div className="space-y-3">
         {data.subfolders.length > 0 && (
-          <h2 className="text-sm font-medium text-zinc-400">Documents</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Documents</h2>
         )}
         <DocumentGrid
           documents={data.documents}

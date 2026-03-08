@@ -86,7 +86,7 @@ export default function AdminUserDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+        <Loader2 className="h-6 w-6 text-muted-foreground animate-spin" />
       </div>
     );
   }
@@ -95,11 +95,11 @@ export default function AdminUserDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
         <AlertCircle className="h-8 w-8 text-red-500" />
-        <p className="text-sm text-zinc-400">User not found</p>
+        <p className="text-sm text-muted-foreground">User not found</p>
         <Button
           variant="outline"
           onClick={() => router.back()}
-          className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+          className="border-border text-foreground/80 hover:bg-accent"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Go back
@@ -116,22 +116,22 @@ export default function AdminUserDetailPage() {
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
-          className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+          className="text-muted-foreground hover:text-foreground hover:bg-accent"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-xl font-bold text-white">
+          <h1 className="text-xl font-bold text-foreground">
             {user.name || 'Unnamed User'}
           </h1>
-          <p className="text-sm text-zinc-400">{user.phone}</p>
+          <p className="text-sm text-muted-foreground">{user.phone}</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
           <Badge
             className={
               user.role === 'ADMIN'
                 ? 'bg-red-600/20 text-red-400 border-red-600/30'
-                : 'bg-zinc-800 text-zinc-400'
+                : 'bg-muted text-muted-foreground'
             }
           >
             {user.role}
@@ -145,35 +145,35 @@ export default function AdminUserDetailPage() {
       </div>
 
       {/* User Info Card */}
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white text-base">User Information</CardTitle>
+          <CardTitle className="text-foreground text-base">User Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center gap-3 text-sm">
-            <Phone className="h-4 w-4 text-zinc-500" />
-            <span className="text-zinc-400">Phone:</span>
-            <span className="text-zinc-200 font-mono">{user.phone}</span>
+            <Phone className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Phone:</span>
+            <span className="text-foreground/80 font-mono">{user.phone}</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <User className="h-4 w-4 text-zinc-500" />
-            <span className="text-zinc-400">Name:</span>
-            <span className="text-zinc-200">{user.name || 'Not set'}</span>
+            <User className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Name:</span>
+            <span className="text-foreground/80">{user.name || 'Not set'}</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Calendar className="h-4 w-4 text-zinc-500" />
-            <span className="text-zinc-400">Joined:</span>
-            <span className="text-zinc-200">{formatDate(user.createdAt)}</span>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Joined:</span>
+            <span className="text-foreground/80">{formatDate(user.createdAt)}</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <FileText className="h-4 w-4 text-zinc-500" />
-            <span className="text-zinc-400">Documents:</span>
-            <span className="text-zinc-200">{user.documentCount}</span>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Documents:</span>
+            <span className="text-foreground/80">{user.documentCount}</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <HardDrive className="h-4 w-4 text-zinc-500" />
-            <span className="text-zinc-400">Storage:</span>
-            <span className="text-zinc-200">
+            <HardDrive className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Storage:</span>
+            <span className="text-foreground/80">
               {formatBytes(user.storageUsedBytes)}
             </span>
           </div>
@@ -181,22 +181,22 @@ export default function AdminUserDetailPage() {
       </Card>
 
       {/* Subscription Card */}
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white text-base">Subscription</CardTitle>
+          <CardTitle className="text-foreground text-base">Subscription</CardTitle>
         </CardHeader>
         <CardContent>
           {user.subscription ? (
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-zinc-400">Status:</span>
+                <span className="text-muted-foreground">Status:</span>
                 <Badge
                   className={
                     user.subscription.status === 'ACTIVE'
                       ? 'bg-green-600/20 text-green-400 border-green-600/30'
                       : user.subscription.status === 'CANCELLED'
                         ? 'bg-yellow-600/20 text-yellow-400 border-yellow-600/30'
-                        : 'bg-zinc-800 text-zinc-400'
+                        : 'bg-muted text-muted-foreground'
                   }
                 >
                   {user.subscription.status}
@@ -204,39 +204,39 @@ export default function AdminUserDetailPage() {
               </div>
               {user.subscription.currentPeriodStart && (
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-zinc-400">Period start:</span>
-                  <span className="text-zinc-200">
+                  <span className="text-muted-foreground">Period start:</span>
+                  <span className="text-foreground/80">
                     {formatDate(user.subscription.currentPeriodStart)}
                   </span>
                 </div>
               )}
               {user.subscription.currentPeriodEnd && (
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-zinc-400">Period end:</span>
-                  <span className="text-zinc-200">
+                  <span className="text-muted-foreground">Period end:</span>
+                  <span className="text-foreground/80">
                     {formatDate(user.subscription.currentPeriodEnd)}
                   </span>
                 </div>
               )}
               {user.subscription.cancelledAt && (
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-zinc-400">Cancelled:</span>
-                  <span className="text-zinc-200">
+                  <span className="text-muted-foreground">Cancelled:</span>
+                  <span className="text-foreground/80">
                     {formatDate(user.subscription.cancelledAt)}
                   </span>
                 </div>
               )}
             </div>
           ) : (
-            <p className="text-sm text-zinc-500">No subscription</p>
+            <p className="text-sm text-muted-foreground">No subscription</p>
           )}
         </CardContent>
       </Card>
 
       {/* Admin Actions */}
-      <Card className="bg-zinc-900 border-zinc-800">
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle className="text-white text-base">Admin Actions</CardTitle>
+          <CardTitle className="text-foreground text-base">Admin Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
           <Button
@@ -264,7 +264,7 @@ export default function AdminUserDetailPage() {
               <Button
                 variant="outline"
                 disabled={updateRole.isPending}
-                className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                className="border-border text-foreground/80 hover:bg-accent"
               >
                 {updateRole.isPending ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -272,16 +272,16 @@ export default function AdminUserDetailPage() {
                 Change Role
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-zinc-900 border-zinc-800">
+            <DropdownMenuContent className="bg-card border-border">
               <DropdownMenuItem
                 onClick={() => handleRoleChange('USER')}
-                className="text-zinc-300 focus:bg-zinc-800 focus:text-white"
+                className="text-foreground/80 focus:bg-accent focus:text-foreground"
               >
                 Set as USER
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleChange('ADMIN')}
-                className="text-zinc-300 focus:bg-zinc-800 focus:text-white"
+                className="text-foreground/80 focus:bg-accent focus:text-foreground"
               >
                 Set as ADMIN
               </DropdownMenuItem>

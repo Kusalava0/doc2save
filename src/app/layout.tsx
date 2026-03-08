@@ -13,8 +13,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://aptsworks.in"),
   title: {
-    default: "Doc2Save",
-    template: "%s | Doc2Save",
+    default: "AptsWorks",
+    template: "%s | AptsWorks",
   },
   description: "Secure cloud document storage for real estate professionals. Upload, organize, and access your documents from anywhere.",
   manifest: "/manifest.json",
@@ -27,22 +27,22 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "Doc2Save",
-    title: "Doc2Save — Secure Cloud Document Storage",
+    siteName: "AptsWorks",
+    title: "AptsWorks — Secure Cloud Document Storage",
     description: "Upload, organize, and access your real estate documents from anywhere. Mobile-first, secure, and always available.",
     url: "https://aptsworks.in",
-    images: [{ url: "/icons/icon-512x512.png", width: 512, height: 512, alt: "Doc2Save" }],
+    images: [{ url: "/icons/icon-512x512.png", width: 512, height: 512, alt: "AptsWorks" }],
   },
   twitter: {
     card: "summary",
-    title: "Doc2Save — Secure Cloud Document Storage",
+    title: "AptsWorks — Secure Cloud Document Storage",
     description: "Upload, organize, and access your real estate documents from anywhere.",
     images: ["/icons/icon-512x512.png"],
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Doc2Save",
+    title: "AptsWorks",
   },
 };
 

@@ -28,19 +28,19 @@ function AdminSidebar() {
   };
 
   return (
-    <div className="flex h-full w-60 flex-col bg-zinc-950 border-r border-zinc-800">
+    <div className="flex h-full w-60 flex-col bg-background border-r border-border">
       {/* Brand */}
       <div className="flex h-14 items-center gap-2 px-4">
         <FileText className="h-6 w-6 text-blue-500" />
-        <span className="text-lg font-bold text-white tracking-tight">
-          Doc2Save
+        <span className="text-lg font-bold text-foreground tracking-tight">
+          AptsWorks
         </span>
         <Badge className="ml-auto bg-red-600/20 text-red-400 border-red-600/30 text-xs">
           Admin
         </Badge>
       </div>
 
-      <Separator className="bg-zinc-800" />
+      <Separator className="bg-border" />
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-2 py-3">
@@ -56,8 +56,8 @@ function AdminSidebar() {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-zinc-800/50 text-white'
-                  : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
+                  ? 'bg-accent/50 text-foreground'
+                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
               )}
             >
               <item.icon className="h-4 w-4 flex-shrink-0" />
@@ -69,12 +69,12 @@ function AdminSidebar() {
 
       {/* Bottom section */}
       <div className="mt-auto space-y-2 px-2 pb-3">
-        <Separator className="bg-zinc-800 mb-2" />
+        <Separator className="bg-border mb-2" />
 
         {/* Back to dashboard */}
         <Link
           href="/dashboard"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800/50 hover:text-white transition-colors"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Dashboard
@@ -83,10 +83,10 @@ function AdminSidebar() {
         {/* User info */}
         {user && (
           <div className="flex items-center gap-2 rounded-lg px-3 py-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-800 text-xs text-white">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs text-foreground">
               {user.name?.charAt(0)?.toUpperCase() || 'A'}
             </div>
-            <span className="text-sm text-zinc-300 truncate">
+            <span className="text-sm text-foreground/80 truncate">
               {user.name || user.phone}
             </span>
             <Shield className="h-3 w-3 text-red-400 ml-auto" />
@@ -96,7 +96,7 @@ function AdminSidebar() {
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800/50 hover:text-white transition-colors"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
         >
           <LogOut className="h-4 w-4" />
           Log out
@@ -126,14 +126,14 @@ export default function AdminLayout({
 
   if (auth.status !== 'authenticated' || auth.user.role !== 'ADMIN') {
     return (
-      <div className="flex h-dvh items-center justify-center bg-black">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-700 border-t-white" />
+      <div className="flex h-dvh items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-foreground" />
       </div>
     );
   }
 
   return (
-        <div className="flex h-dvh bg-black">
+        <div className="flex h-dvh bg-background">
           {/* Sidebar */}
           <aside className="hidden md:flex md:w-60 md:flex-shrink-0">
             <AdminSidebar />
@@ -142,9 +142,9 @@ export default function AdminLayout({
           {/* Main content area */}
           <div className="flex flex-1 flex-col min-w-0">
             {/* Mobile header */}
-            <div className="flex h-14 items-center gap-2 px-4 border-b border-zinc-800 md:hidden">
+            <div className="flex h-14 items-center gap-2 px-4 border-b border-border md:hidden">
               <FileText className="h-5 w-5 text-blue-500" />
-              <span className="font-bold text-white">Doc2Save</span>
+              <span className="font-bold text-foreground">AptsWorks</span>
               <Badge className="bg-red-600/20 text-red-400 border-red-600/30 text-xs">
                 Admin
               </Badge>
@@ -155,12 +155,12 @@ export default function AdminLayout({
             </main>
 
             {/* Mobile bottom nav for admin */}
-            <nav className="flex md:hidden border-t border-zinc-800 bg-zinc-950">
+            <nav className="flex md:hidden border-t border-border bg-background">
               {adminNavItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex flex-1 flex-col items-center gap-1 py-2 text-zinc-400 hover:text-white"
+                  className="flex flex-1 flex-col items-center gap-1 py-2 text-muted-foreground hover:text-foreground"
                 >
                   <item.icon className="h-5 w-5" />
                   <span className="text-[10px]">{item.label}</span>

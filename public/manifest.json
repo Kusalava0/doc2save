@@ -1,6 +1,6 @@
 {
-  "name": "Doc2Save",
-  "short_name": "Doc2Save",
+  "name": "AptsWorks",
+  "short_name": "AptsWorks",
   "description": "Secure cloud document storage for real estate professionals. Upload, organize, and access your documents from anywhere.",
   "id": "/dashboard",
   "start_url": "/dashboard",

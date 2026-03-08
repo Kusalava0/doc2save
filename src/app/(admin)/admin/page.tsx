@@ -77,25 +77,25 @@ export default function AdminDashboardPage() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
-        <p className="text-sm text-zinc-400 mt-1">
-          Overview of Doc2Save platform metrics
+        <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Overview of AptsWorks platform metrics
         </p>
       </div>
 
       {error ? (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-card border-border">
           <CardContent className="flex items-center gap-3 py-8 justify-center">
             <AlertCircle className="h-5 w-5 text-red-500" />
-            <p className="text-sm text-zinc-400">Failed to load stats</p>
+            <p className="text-sm text-muted-foreground">Failed to load stats</p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {statCards.map((card) => (
-            <Card key={card.key} className="bg-zinc-900 border-zinc-800">
+            <Card key={card.key} className="bg-card border-border">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-zinc-400">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   {card.label}
                 </CardTitle>
                 <div className={`p-2 rounded-lg ${card.bgColor}`}>
@@ -104,9 +104,9 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent>
                 {isLoading ? (
-                  <Loader2 className="h-5 w-5 text-zinc-500 animate-spin" />
+                  <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
                 ) : (
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-2xl font-bold text-foreground">
                     {stats ? card.format(stats[card.key]) : '--'}
                   </p>
                 )}

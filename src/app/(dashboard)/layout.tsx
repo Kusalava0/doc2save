@@ -16,7 +16,7 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <div className="flex h-dvh bg-black">
+      <div className="flex h-dvh bg-background">
         {/* Desktop sidebar */}
         <aside className="hidden md:flex md:w-60 md:flex-shrink-0">
           <Sidebar />

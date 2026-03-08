@@ -17,7 +17,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
     <nav className="flex items-center gap-1 text-sm overflow-x-auto">
       <Link
         href="/documents"
-        className="text-zinc-400 hover:text-white transition-colors whitespace-nowrap"
+        className="text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
       >
         Home
       </Link>
@@ -27,13 +27,13 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
           <span key={item.id} className="flex items-center gap-1">
             <ChevronRight className="h-3.5 w-3.5 text-zinc-600 flex-shrink-0" />
             {isLast ? (
-              <span className="text-white font-medium whitespace-nowrap">
+              <span className="text-foreground font-medium whitespace-nowrap">
                 {item.name}
               </span>
             ) : (
               <Link
                 href={`/documents/${item.id}`}
-                className="text-zinc-400 hover:text-white transition-colors whitespace-nowrap"
+                className="text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
               >
                 {item.name}
               </Link>

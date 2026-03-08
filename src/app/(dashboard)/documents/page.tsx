@@ -25,17 +25,17 @@ export default function DocumentsPage() {
     <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">My Documents</h1>
+        <h1 className="text-2xl font-bold text-foreground">My Documents</h1>
         <div className="flex items-center gap-2">
           {/* View toggle */}
-          <div className="hidden sm:flex items-center rounded-lg border border-zinc-800 p-0.5">
+          <div className="hidden sm:flex items-center rounded-lg border border-border p-0.5">
             <button
               onClick={() => setViewMode('grid')}
               className={cn(
                 'rounded-md p-1.5 transition-colors',
                 viewMode === 'grid'
-                  ? 'bg-zinc-800 text-white'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground/80'
               )}
             >
               <Grid3X3 className="h-4 w-4" />
@@ -45,8 +45,8 @@ export default function DocumentsPage() {
               className={cn(
                 'rounded-md p-1.5 transition-colors',
                 viewMode === 'list'
-                  ? 'bg-zinc-800 text-white'
-                  : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground/80'
               )}
             >
               <List className="h-4 w-4" />
@@ -56,7 +56,7 @@ export default function DocumentsPage() {
           <Button
             variant="outline"
             onClick={() => setCreateFolderOpen(true)}
-            className="border-zinc-800 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+            className="border-border bg-card text-foreground/80 hover:bg-accent hover:text-foreground"
           >
             <FolderPlus className="h-4 w-4 mr-2" />
             <span className="hidden sm:inline">New Folder</span>
@@ -75,10 +75,10 @@ export default function DocumentsPage() {
       {/* Folders */}
       {foldersLoading && (
         <div className="space-y-2">
-          <Skeleton className="h-4 w-20 bg-zinc-800" />
+          <Skeleton className="h-4 w-20 bg-muted" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 rounded-xl bg-zinc-900" />
+              <Skeleton key={i} className="h-16 rounded-xl bg-card" />
             ))}
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function DocumentsPage() {
 
       {!foldersLoading && folders && folders.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-sm font-medium text-zinc-400">Folders</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Folders</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {folders.map((folder) => (
               <FolderCard key={folder.id} folder={folder} />
@@ -98,7 +98,7 @@ export default function DocumentsPage() {
       {/* Documents */}
       <div className="space-y-3">
         {(!foldersLoading && folders && folders.length > 0) && (
-          <h2 className="text-sm font-medium text-zinc-400">Documents</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Documents</h2>
         )}
         <DocumentGrid
           documents={documents}

@@ -99,25 +99,25 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
     <>
       <button
         onClick={handleMenuAction(handleClick)}
-        className="flex items-center gap-3 w-full px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-800 active:bg-zinc-800 transition-colors"
+        className="flex items-center gap-3 w-full px-4 py-3 text-sm text-foreground/80 hover:bg-accent active:bg-accent transition-colors"
       >
-        <Eye className="h-5 w-5 text-zinc-400" />
+        <Eye className="h-5 w-5 text-muted-foreground" />
         Preview
       </button>
       <button
         onClick={handleMenuAction(() => handleDownload())}
-        className="flex items-center gap-3 w-full px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-800 active:bg-zinc-800 transition-colors"
+        className="flex items-center gap-3 w-full px-4 py-3 text-sm text-foreground/80 hover:bg-accent active:bg-accent transition-colors"
       >
-        <Download className="h-5 w-5 text-zinc-400" />
+        <Download className="h-5 w-5 text-muted-foreground" />
         Download
       </button>
       <button
         onClick={handleMenuAction(() =>
           openModal({ type: 'move-document', documentId: doc.id })
         )}
-        className="flex items-center gap-3 w-full px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-800 active:bg-zinc-800 transition-colors"
+        className="flex items-center gap-3 w-full px-4 py-3 text-sm text-foreground/80 hover:bg-accent active:bg-accent transition-colors"
       >
-        <Move className="h-5 w-5 text-zinc-400" />
+        <Move className="h-5 w-5 text-muted-foreground" />
         Move
       </button>
       <button
@@ -128,7 +128,7 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
             documentName: doc.name,
           })
         )}
-        className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-400 hover:bg-zinc-800 active:bg-zinc-800 transition-colors"
+        className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-400 hover:bg-accent active:bg-accent transition-colors"
       >
         <Trash2 className="h-5 w-5" />
         Delete
@@ -138,9 +138,9 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
 
   const mobileSheet = (
     <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-      <SheetContent side="bottom" className="bg-zinc-900 border-zinc-800 px-0 pb-8">
+      <SheetContent side="bottom" className="bg-card border-border px-0 pb-8">
         <SheetHeader className="px-4 pb-2">
-          <SheetTitle className="text-white text-sm truncate text-left">
+          <SheetTitle className="text-foreground text-sm truncate text-left">
             {doc.name}
           </SheetTitle>
         </SheetHeader>
@@ -156,7 +156,7 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
           variant="ghost"
           size="icon"
           className={cn(
-            'h-7 w-7 text-zinc-500 hover:text-white transition-opacity',
+            'h-7 w-7 text-muted-foreground hover:text-foreground transition-opacity',
             viewMode === 'list' ? 'h-8 w-8 opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'
           )}
         >
@@ -165,21 +165,21 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="bg-zinc-900 border-zinc-800"
+        className="bg-card border-border"
       >
         <DropdownMenuItem
           onClick={(e) => {
             e.stopPropagation();
             handleClick();
           }}
-          className="text-zinc-300 focus:text-white focus:bg-zinc-800"
+          className="text-foreground/80 focus:text-foreground focus:bg-accent"
         >
           <Eye className="h-4 w-4 mr-2" />
           Preview
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleDownload}
-          className="text-zinc-300 focus:text-white focus:bg-zinc-800"
+          className="text-foreground/80 focus:text-foreground focus:bg-accent"
         >
           <Download className="h-4 w-4 mr-2" />
           Download
@@ -189,7 +189,7 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
             e.stopPropagation();
             openModal({ type: 'move-document', documentId: doc.id });
           }}
-          className="text-zinc-300 focus:text-white focus:bg-zinc-800"
+          className="text-foreground/80 focus:text-foreground focus:bg-accent"
         >
           <Move className="h-4 w-4 mr-2" />
           Move
@@ -203,7 +203,7 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
               documentName: doc.name,
             });
           }}
-          className="text-red-400 focus:text-red-300 focus:bg-zinc-800"
+          className="text-red-400 focus:text-red-300 focus:bg-accent"
         >
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
@@ -218,7 +218,7 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
       size="icon"
       onClick={openMenuOrSheet}
       className={cn(
-        'h-7 w-7 text-zinc-500 hover:text-white transition-opacity',
+        'h-7 w-7 text-muted-foreground hover:text-foreground transition-opacity',
         isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
         viewMode === 'list' && 'h-8 w-8'
       )}
@@ -231,28 +231,28 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
     return (
       <div
         onClick={handleClick}
-        className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-900/50 transition-colors cursor-pointer group"
+        className="flex items-center gap-3 px-4 py-3 hover:bg-card/50 transition-colors cursor-pointer group"
       >
         <FileIcon mimeType={doc.mimeType} />
-        <span className="flex-1 text-sm text-white truncate min-w-0">
+        <span className="flex-1 text-sm text-foreground truncate min-w-0">
           {doc.name}
         </span>
-        <span className="hidden sm:block text-xs text-zinc-500 w-20 text-right">
+        <span className="hidden sm:block text-xs text-muted-foreground w-20 text-right">
           {formatFileSize(doc.size)}
         </span>
-        <span className="hidden md:block text-xs text-zinc-500 w-28 text-right">
+        <span className="hidden md:block text-xs text-muted-foreground w-28 text-right">
           {formatDate(doc.uploadedAt)}
         </span>
         <button
           onClick={handleToggleFavorite}
-          className="p-1 rounded hover:bg-zinc-800 transition-colors"
+          className="p-1 rounded hover:bg-accent transition-colors"
         >
           <Star
             className={cn(
               'h-4 w-4 transition-colors',
               doc.isFavorite
                 ? 'fill-yellow-400 text-yellow-400'
-                : 'text-zinc-600 hover:text-zinc-400'
+                : 'text-zinc-600 hover:text-muted-foreground'
             )}
           />
         </button>
@@ -266,23 +266,23 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
   return (
     <div
       onClick={handleClick}
-      className="group relative rounded-xl border border-zinc-800 bg-zinc-900 p-4 hover:border-zinc-700 transition-colors cursor-pointer"
+      className="group relative rounded-xl border border-border bg-card p-4 hover:border-border transition-colors cursor-pointer"
     >
       <div className="flex items-start justify-between mb-3">
-        <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center">
+        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
           <FileIcon mimeType={doc.mimeType} className="h-5 w-5" />
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={handleToggleFavorite}
-            className="p-1 rounded hover:bg-zinc-800 transition-colors"
+            className="p-1 rounded hover:bg-accent transition-colors"
           >
             <Star
               className={cn(
                 'h-4 w-4 transition-colors',
                 doc.isFavorite
                   ? 'fill-yellow-400 text-yellow-400'
-                  : 'text-zinc-600 hover:text-zinc-400'
+                  : 'text-zinc-600 hover:text-muted-foreground'
               )}
             />
           </button>
@@ -290,10 +290,10 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
         </div>
       </div>
 
-      <p className="text-sm font-medium text-white truncate mb-1">
+      <p className="text-sm font-medium text-foreground truncate mb-1">
         {doc.name}
       </p>
-      <div className="flex items-center gap-2 text-xs text-zinc-500">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <span>{formatFileSize(doc.size)}</span>
         <span className="text-zinc-700">&middot;</span>
         <span>{formatDate(doc.uploadedAt)}</span>

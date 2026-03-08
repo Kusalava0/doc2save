@@ -11,7 +11,7 @@ function serializeDocument(doc: { size: bigint; [key: string]: unknown }) {
   return { ...doc, size: Number(doc.size) };
 }
 
-// GET /api/documents/search — Search documents by name
+// GET /api/documents/search — Search documents and folders by name
 export async function GET(request: NextRequest) {
   try {
     const userId = getUserId(request);
@@ -22,20 +22,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Search query is required' }, { status: 400 });
     }
 
-    const documents = await prisma.document.findMany({
-      where: {
-        userId,
-        name: {
-          contains: q.trim(),
-          mode: 'insensitive',
+    const trimmed = q.trim();
+
+    const [documents, folders] = await Promise.all([
+      prisma.document.findMany({
+        where: {
+          userId,
+          name: { contains: trimmed, mode: 'insensitive' },
         },
-      },
-      orderBy: { uploadedAt: 'desc' },
-      take: 50,
-    });
+        orderBy: { uploadedAt: 'desc' },
+        take: 50,
+      }),
+      prisma.folder.findMany({
+        where: {
+          userId,
+          name: { contains: trimmed, mode: 'insensitive' },
+        },
+        include: {
+          _count: { select: { documents: true, children: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      }),
+    ]);
 
     return NextResponse.json({
       documents: documents.map(serializeDocument),
+      folders,
     });
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {

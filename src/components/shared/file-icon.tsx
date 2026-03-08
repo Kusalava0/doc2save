@@ -22,5 +22,5 @@ export function FileIcon({ mimeType, className }: FileIconProps) {
     return <FileText className={cn('h-5 w-5 text-blue-400', className)} />;
   }
 
-  return <File className={cn('h-5 w-5 text-zinc-400', className)} />;
+  return <File className={cn('h-5 w-5 text-muted-foreground', className)} />;
 }

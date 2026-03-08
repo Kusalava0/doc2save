@@ -49,9 +49,9 @@ export function RenameFolderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-zinc-950 border-zinc-800 text-white sm:max-w-md">
+      <DialogContent className="bg-background border-border text-foreground sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white">Rename Folder</DialogTitle>
+          <DialogTitle className="text-foreground">Rename Folder</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <Input
@@ -59,14 +59,14 @@ export function RenameFolderDialog({
             onChange={(e) => setName(e.target.value)}
             placeholder="Folder name"
             autoFocus
-            className="bg-zinc-900 border-zinc-800 text-white placeholder:text-zinc-500 focus-visible:ring-zinc-700"
+            className="bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
           />
           <DialogFooter className="mt-4">
             <Button
               type="button"
               variant="ghost"
               onClick={() => onOpenChange(false)}
-              className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+              className="text-muted-foreground hover:text-foreground hover:bg-accent"
             >
               Cancel
             </Button>
