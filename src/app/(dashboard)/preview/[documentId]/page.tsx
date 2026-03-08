@@ -9,6 +9,9 @@ import {
   Download,
   Star,
   Loader2,
+  ZoomIn,
+  ZoomOut,
+  Maximize,
   FileText,
   AlertCircle,
 } from 'lucide-react';
@@ -40,10 +43,14 @@ async function fetchJson<T>(url: string): Promise<T> {
   return res.json();
 }
 
-function usePinchZoom(containerRef: React.RefObject<HTMLDivElement | null>) {
-  const [scale, setScale] = useState(1);
-  const baseScale = useRef(1);
+// Pinch-to-zoom hook that commits zoom on gesture end (no CSS transform)
+function usePinchZoom(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  zoom: number,
+  setZoom: (z: number) => void,
+) {
   const startDistance = useRef(0);
+  const baseZoom = useRef(1);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -58,34 +65,47 @@ function usePinchZoom(containerRef: React.RefObject<HTMLDivElement | null>) {
     function onTouchStart(e: TouchEvent) {
       if (e.touches.length === 2) {
         startDistance.current = getDistance(e.touches[0], e.touches[1]);
-        baseScale.current = scale;
+        baseZoom.current = zoom;
       }
     }
 
     function onTouchMove(e: TouchEvent) {
       if (e.touches.length === 2) {
         e.preventDefault();
-        const dist = getDistance(e.touches[0], e.touches[1]);
-        const newScale = Math.min(
-          Math.max(baseScale.current * (dist / startDistance.current), 0.5),
-          4
-        );
-        setScale(newScale);
+      }
+    }
+
+    function onTouchEnd(e: TouchEvent) {
+      // When going from 2 touches to <2, commit the zoom
+      if (e.touches.length < 2 && startDistance.current > 0) {
+        const endTouches = e.changedTouches;
+        if (endTouches.length > 0 && e.touches.length === 1) {
+          const remaining = e.touches[0];
+          const ended = endTouches[0];
+          const dist = getDistance(remaining, ended);
+          const ratio = dist / startDistance.current;
+          const newZoom = Math.min(Math.max(baseZoom.current * ratio, 0.5), 4);
+          setZoom(Math.round(newZoom * 20) / 20); // Snap to 5% increments
+        } else if (e.touches.length === 0 && endTouches.length >= 2) {
+          const dist = getDistance(endTouches[0], endTouches[1]);
+          const ratio = dist / startDistance.current;
+          const newZoom = Math.min(Math.max(baseZoom.current * ratio, 0.5), 4);
+          setZoom(Math.round(newZoom * 20) / 20);
+        }
+        startDistance.current = 0;
       }
     }
 
     el.addEventListener('touchstart', onTouchStart, { passive: true });
     el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
 
     return () => {
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
     };
-  }, [containerRef, scale]);
-
-  const resetScale = useCallback(() => setScale(1), []);
-
-  return { scale, resetScale };
+  }, [containerRef, zoom, setZoom]);
 }
 
 export default function PreviewPage() {
@@ -93,18 +113,21 @@ export default function PreviewPage() {
   const router = useRouter();
   const documentId = params.documentId;
 
-  const [pageWidth, setPageWidth] = useState(400);
+  const [zoom, setZoom] = useState(1);
+  const [containerWidth, setContainerWidth] = useState(400);
+  const [pageCount, setPageCount] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { scale, resetScale } = usePinchZoom(containerRef);
+
+  usePinchZoom(containerRef, zoom, setZoom);
 
   const toggleFavorite = useToggleFavorite();
 
-  // Calculate page width based on container
+  // Measure container width on mount and resize
   useEffect(() => {
     function updateWidth() {
       if (containerRef.current) {
         const w = containerRef.current.clientWidth - 16;
-        setPageWidth(Math.min(w, 900));
+        setContainerWidth(Math.min(w, 900));
       }
     }
     updateWidth();
@@ -161,12 +184,18 @@ export default function PreviewPage() {
     });
   }, [document, toggleFavorite]);
 
+  const handleZoomIn = () => setZoom((z) => Math.min(z + 0.25, 4));
+  const handleZoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5));
+  const handleFitToWidth = () => setZoom(1);
+  const handlePageCount = useCallback((count: number) => setPageCount(count), []);
+
   const isImage = document?.mimeType.startsWith('image/');
   const isPdf = document?.mimeType === 'application/pdf';
   const isDocx =
     document?.mimeType ===
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
+  const showZoomControls = (isImage || isPdf) && !docLoading && !previewLoading;
   const isLoading = docLoading || previewLoading;
   const error = docError || previewError;
 
@@ -212,15 +241,6 @@ export default function PreviewPage() {
         )}
 
         <div className="flex items-center gap-1 shrink-0">
-          {scale !== 1 && (
-            <button
-              onClick={resetScale}
-              className="text-xs text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-800"
-            >
-              {Math.round(scale * 100)}% ✕
-            </button>
-          )}
-
           <Button
             variant="ghost"
             size="icon"
@@ -248,7 +268,63 @@ export default function PreviewPage() {
         </div>
       </div>
 
-      {/* Preview area */}
+      {/* Zoom toolbar */}
+      {showZoomControls && (
+        <div className="flex items-center justify-center gap-1.5 px-3 py-2 border-b border-zinc-800 bg-zinc-950 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleZoomOut}
+            disabled={zoom <= 0.5}
+            className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+
+          <button
+            onClick={handleFitToWidth}
+            className="text-xs text-zinc-400 hover:text-white px-2.5 py-1 rounded hover:bg-zinc-800 min-w-[3.5rem] text-center"
+          >
+            {Math.round(zoom * 100)}%
+          </button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleZoomIn}
+            disabled={zoom >= 4}
+            className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+
+          {zoom !== 1 && (
+            <>
+              <div className="w-px h-5 bg-zinc-700 mx-1" />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleFitToWidth}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800 h-8 w-8"
+                title="Fit to width"
+              >
+                <Maximize className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+
+          {isPdf && pageCount > 0 && (
+            <>
+              <div className="w-px h-5 bg-zinc-700 mx-1" />
+              <span className="text-xs text-zinc-500">
+                {pageCount} {pageCount === 1 ? 'page' : 'pages'}
+              </span>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Preview area — scrolls in both directions when zoomed */}
       <div
         ref={containerRef}
         className="flex-1 overflow-auto bg-black"
@@ -261,24 +337,27 @@ export default function PreviewPage() {
         ) : isPdf ? (
           <PdfViewer
             fileUrl={`/api/documents/${documentId}/preview/proxy`}
-            pageWidth={pageWidth}
-            scale={scale}
+            containerWidth={containerWidth}
+            zoom={zoom}
             onDownload={handleDownload}
+            onPageCount={handlePageCount}
           />
         ) : isImage && previewUrl ? (
           <div
-            style={{
-              transform: `scale(${scale})`,
-              transformOrigin: 'top left',
-              width: scale > 1 ? `${100 / scale}%` : '100%',
-            }}
+            className="inline-block min-w-full"
+            style={{ padding: '1rem' }}
           >
-            <div className="flex items-center justify-center min-h-full p-4">
+            <div className="flex items-center justify-center" style={{ minHeight: '100%' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
                 alt={document?.name || 'Document preview'}
-                className="max-w-full max-h-[calc(100vh-6rem)] object-contain rounded-lg"
+                style={{
+                  width: zoom === 1 ? '100%' : `${containerWidth * zoom}px`,
+                  maxWidth: zoom === 1 ? '100%' : 'none',
+                  height: 'auto',
+                }}
+                className="rounded-lg object-contain"
               />
             </div>
           </div>

@@ -6,14 +6,10 @@ import { Button } from '@/components/ui/button';
 
 interface PdfViewerProps {
   fileUrl: string;
-  pageWidth: number;
-  scale: number;
+  containerWidth: number;
+  zoom: number;
   onDownload: () => void;
-}
-
-interface PdfPage {
-  pageNumber: number;
-  rendered: boolean;
+  onPageCount?: (count: number) => void;
 }
 
 // Load pdf.js from CDN — bypasses webpack/turbopack bundling entirely
@@ -31,12 +27,22 @@ async function getPdfJs(): Promise<any> {
   return pdfjsLib;
 }
 
-export function PdfViewer({ fileUrl, pageWidth, scale, onDownload }: PdfViewerProps) {
-  const [pages, setPages] = useState<PdfPage[]>([]);
+export function PdfViewer({
+  fileUrl,
+  containerWidth,
+  zoom,
+  onDownload,
+  onPageCount,
+}: PdfViewerProps) {
+  const [numPages, setNumPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const pdfDocRef = useRef<any>(null);
+  const renderingRef = useRef<Set<number>>(new Set());
+
+  // The actual pixel width each page renders at
+  const renderWidth = Math.round(containerWidth * zoom);
 
   // Load the PDF document
   useEffect(() => {
@@ -46,15 +52,10 @@ export function PdfViewer({ fileUrl, pageWidth, scale, onDownload }: PdfViewerPr
       try {
         const pdfjsLib = await getPdfJs();
         const pdf = await pdfjsLib.getDocument(fileUrl).promise;
-
         if (cancelled) return;
         pdfDocRef.current = pdf;
-        setPages(
-          Array.from({ length: pdf.numPages }, (_, i) => ({
-            pageNumber: i + 1,
-            rendered: false,
-          }))
-        );
+        setNumPages(pdf.numPages);
+        onPageCount?.(pdf.numPages);
         setLoading(false);
       } catch {
         if (!cancelled) {
@@ -68,47 +69,52 @@ export function PdfViewer({ fileUrl, pageWidth, scale, onDownload }: PdfViewerPr
     return () => {
       cancelled = true;
     };
-  }, [fileUrl]);
+  }, [fileUrl, onPageCount]);
 
-  // Render pages to canvases when refs are available or width changes
+  // Render a single page to its canvas
   const renderPage = useCallback(
     async (pageNum: number, canvas: HTMLCanvasElement) => {
       const pdf = pdfDocRef.current;
       if (!pdf || !canvas) return;
+      if (renderingRef.current.has(pageNum)) return;
+      renderingRef.current.add(pageNum);
 
       try {
         const page = await pdf.getPage(pageNum);
         const unscaledViewport = page.getViewport({ scale: 1 });
-        const renderScale = pageWidth / unscaledViewport.width;
-        // Use 2x for retina sharpness
-        const outputScale = Math.min(window.devicePixelRatio || 1, 2);
-        const viewport = page.getViewport({ scale: renderScale * outputScale });
+        const scaleToFit = renderWidth / unscaledViewport.width;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const viewport = page.getViewport({ scale: scaleToFit * dpr });
 
         canvas.width = viewport.width;
         canvas.height = viewport.height;
-        canvas.style.width = `${pageWidth}px`;
-        canvas.style.height = `${(pageWidth / unscaledViewport.width) * unscaledViewport.height}px`;
+        canvas.style.width = `${renderWidth}px`;
+        canvas.style.height = `${Math.round(
+          (renderWidth / unscaledViewport.width) * unscaledViewport.height
+        )}px`;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
         await page.render({ canvasContext: ctx, viewport }).promise;
       } catch {
-        // Individual page render failure — leave canvas blank
+        // Silently skip failed pages
+      } finally {
+        renderingRef.current.delete(pageNum);
       }
     },
-    [pageWidth]
+    [renderWidth]
   );
 
-  // Re-render all pages when pageWidth changes
+  // Re-render all pages when zoom/width changes
   useEffect(() => {
-    if (!pdfDocRef.current || pages.length === 0) return;
+    if (!pdfDocRef.current || numPages === 0) return;
 
-    pages.forEach((p) => {
-      const canvas = canvasRefs.current.get(p.pageNumber);
-      if (canvas) renderPage(p.pageNumber, canvas);
-    });
-  }, [pages, pageWidth, renderPage]);
+    for (let i = 1; i <= numPages; i++) {
+      const canvas = canvasRefs.current.get(i);
+      if (canvas) renderPage(i, canvas);
+    }
+  }, [numPages, renderWidth, renderPage]);
 
   const setCanvasRef = useCallback(
     (pageNum: number) => (el: HTMLCanvasElement | null) => {
@@ -147,28 +153,19 @@ export function PdfViewer({ fileUrl, pageWidth, scale, onDownload }: PdfViewerPr
   }
 
   return (
-    <div
-      style={{
-        transform: `scale(${scale})`,
-        transformOrigin: 'top left',
-        width: scale > 1 ? `${100 / scale}%` : '100%',
-      }}
-    >
-      <div className="flex flex-col items-center py-4 px-2 gap-3">
-        {pages.map((p) => (
-          <canvas
-            key={p.pageNumber}
-            ref={setCanvasRef(p.pageNumber)}
-            className="shadow-lg rounded-sm bg-white"
-            style={{ maxWidth: '100%' }}
-          />
-        ))}
-        {pages.length > 0 && (
-          <p className="text-xs text-zinc-500 pb-4">
-            {pages.length} {pages.length === 1 ? 'page' : 'pages'}
-          </p>
-        )}
-      </div>
+    <div className="inline-flex flex-col items-center py-4 px-2 gap-3 min-w-full">
+      {Array.from({ length: numPages }, (_, i) => (
+        <canvas
+          key={i + 1}
+          ref={setCanvasRef(i + 1)}
+          className="shadow-lg rounded-sm bg-white block"
+        />
+      ))}
+      {numPages > 0 && (
+        <p className="text-xs text-zinc-500 pb-4">
+          {numPages} {numPages === 1 ? 'page' : 'pages'}
+        </p>
+      )}
     </div>
   );
 }
