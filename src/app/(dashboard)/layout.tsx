@@ -7,6 +7,7 @@ import { MobileSidebarSheet } from '@/components/layout/mobile-sidebar-sheet';
 import { AuthGuard } from '@/components/auth/auth-guard';
 import { ModalDispatcher } from '@/components/shared/modal-dispatcher';
 import { NotificationInit } from '@/components/shared/notification-init';
+import { PwaInstallBanner } from '@/components/shared/pwa-install-banner';
 
 export default function DashboardLayout({
   children,
@@ -38,6 +39,7 @@ export default function DashboardLayout({
         {/* Global modal dispatcher */}
         <ModalDispatcher />
         <NotificationInit />
+        <PwaInstallBanner />
       </div>
     </AuthGuard>
   );
