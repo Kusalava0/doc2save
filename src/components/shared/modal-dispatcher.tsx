@@ -6,6 +6,8 @@ import { UploadDialog } from '@/components/documents/upload-dialog';
 import { DeleteDocumentDialog } from '@/components/documents/delete-dialog';
 import { DeleteFolderDialog } from '@/components/folders/delete-folder-dialog';
 import { RenameFolderDialog } from '@/components/folders/rename-folder-dialog';
+import { BulkMoveDialog } from '@/components/documents/bulk-move-dialog';
+import { BulkMoveFolderDialog } from '@/components/folders/bulk-move-folder-dialog';
 
 export function ModalDispatcher() {
   const activeModal = useUIStore((s) => s.activeModal);
@@ -85,6 +87,24 @@ export function ModalDispatcher() {
           }}
           open
           onOpenChange={(open) => !open && closeModal()}
+        />
+      );
+
+    case 'bulk-move-documents':
+      return (
+        <BulkMoveDialog
+          open
+          onOpenChange={(open) => !open && closeModal()}
+          documentIds={activeModal.documentIds}
+        />
+      );
+
+    case 'bulk-move-folders':
+      return (
+        <BulkMoveFolderDialog
+          open
+          onOpenChange={(open) => !open && closeModal()}
+          folderIds={activeModal.folderIds}
         />
       );
 

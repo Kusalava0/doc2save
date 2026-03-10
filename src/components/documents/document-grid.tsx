@@ -4,6 +4,7 @@ import { FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUIStore } from '@/stores/ui-store';
 import { DocumentCard } from '@/components/documents/document-card';
+import { BulkActionBar } from '@/components/documents/bulk-action-bar';
 import type { DocumentData } from '@/types/api';
 
 interface DocumentGridProps {
@@ -71,21 +72,29 @@ export function DocumentGrid({
     );
   }
 
+  const allDocIds = documents.map((d) => d.id);
+
   if (viewMode === 'list') {
     return (
-      <div className="rounded-xl border border-border divide-y divide-border">
-        {documents.map((doc) => (
-          <DocumentCard key={doc.id} document={doc} />
-        ))}
-      </div>
+      <>
+        <div className="rounded-xl border border-border divide-y divide-border">
+          {documents.map((doc) => (
+            <DocumentCard key={doc.id} document={doc} />
+          ))}
+        </div>
+        <BulkActionBar allDocumentIds={allDocIds} />
+      </>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-      {documents.map((doc) => (
-        <DocumentCard key={doc.id} document={doc} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+        {documents.map((doc) => (
+          <DocumentCard key={doc.id} document={doc} />
+        ))}
+      </div>
+      <BulkActionBar allDocumentIds={allDocIds} />
+    </>
   );
 }

@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 export type ViewMode = 'grid' | 'list';
 export type SortBy = 'name' | 'date' | 'size';
 export type SortOrder = 'asc' | 'desc';
+export type SelectionType = 'documents' | 'folders' | null;
 
 export type ModalType =
   | { type: 'none' }
@@ -15,6 +16,8 @@ export type ModalType =
   | { type: 'delete-folder'; folderId: string; folderName: string }
   | { type: 'move-document'; documentId: string }
   | { type: 'move-folder'; folderId: string }
+  | { type: 'bulk-move-documents'; documentIds: string[] }
+  | { type: 'bulk-move-folders'; folderIds: string[] }
   | { type: 'paywall' }
   | { type: 'pwa-install' };
 
@@ -45,6 +48,20 @@ interface UIStore {
   selectedFolderId: string | null;
   selectDocument: (id: string | null) => void;
   selectFolder: (id: string | null) => void;
+
+  // Multi-select / bulk actions
+  selectionMode: boolean;
+  selectionType: SelectionType;
+  selectedDocumentIds: Set<string>;
+  selectedFolderIds: Set<string>;
+  enterSelectionMode: (type: 'documents' | 'folders', initialId?: string) => void;
+  exitSelectionMode: () => void;
+  toggleDocumentSelection: (docId: string) => void;
+  toggleFolderSelection: (folderId: string) => void;
+  selectAllDocuments: (docIds: string[]) => void;
+  selectAllFolders: (folderIds: string[]) => void;
+  deselectAllDocuments: () => void;
+  deselectAllFolders: () => void;
 }
 
 export const useUIStore = create<UIStore>()(
@@ -78,6 +95,63 @@ export const useUIStore = create<UIStore>()(
       selectedFolderId: null,
       selectDocument: (id) => set({ selectedDocumentId: id }),
       selectFolder: (id) => set({ selectedFolderId: id }),
+
+      // Multi-select / bulk actions
+      selectionMode: false,
+      selectionType: null,
+      selectedDocumentIds: new Set<string>(),
+      selectedFolderIds: new Set<string>(),
+
+      enterSelectionMode: (type, initialId) =>
+        set({
+          selectionMode: true,
+          selectionType: type,
+          selectedDocumentIds: type === 'documents' && initialId ? new Set([initialId]) : new Set(),
+          selectedFolderIds: type === 'folders' && initialId ? new Set([initialId]) : new Set(),
+        }),
+      exitSelectionMode: () =>
+        set({
+          selectionMode: false,
+          selectionType: null,
+          selectedDocumentIds: new Set(),
+          selectedFolderIds: new Set(),
+        }),
+
+      toggleDocumentSelection: (docId) =>
+        set((s) => {
+          const next = new Set(s.selectedDocumentIds);
+          if (next.has(docId)) {
+            next.delete(docId);
+          } else {
+            next.add(docId);
+          }
+          if (next.size === 0) {
+            return { selectedDocumentIds: next, selectionMode: false, selectionType: null };
+          }
+          return { selectedDocumentIds: next };
+        }),
+      toggleFolderSelection: (folderId) =>
+        set((s) => {
+          const next = new Set(s.selectedFolderIds);
+          if (next.has(folderId)) {
+            next.delete(folderId);
+          } else {
+            next.add(folderId);
+          }
+          if (next.size === 0) {
+            return { selectedFolderIds: next, selectionMode: false, selectionType: null };
+          }
+          return { selectedFolderIds: next };
+        }),
+
+      selectAllDocuments: (docIds) =>
+        set({ selectedDocumentIds: new Set(docIds) }),
+      selectAllFolders: (folderIds) =>
+        set({ selectedFolderIds: new Set(folderIds) }),
+      deselectAllDocuments: () =>
+        set({ selectedDocumentIds: new Set() }),
+      deselectAllFolders: () =>
+        set({ selectedFolderIds: new Set() }),
     }),
     {
       name: 'doc2save-ui',

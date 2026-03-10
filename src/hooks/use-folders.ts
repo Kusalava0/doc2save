@@ -160,3 +160,60 @@ export function useMoveFolder() {
     },
   });
 }
+
+export function useBulkDeleteFolders() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (folderIds: string[]) => {
+      const results = await Promise.allSettled(
+        folderIds.map((id) =>
+          fetch(`/api/folders/${id}`, { method: 'DELETE' }).then((res) => {
+            if (!res.ok) throw new Error(`Failed to delete ${id}`);
+          })
+        )
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      if (failed > 0) {
+        throw new Error(`Failed to delete ${failed} of ${folderIds.length} projects`);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.documents.all });
+    },
+  });
+}
+
+export function useBulkMoveFolders() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      folderIds,
+      targetParentId,
+    }: {
+      folderIds: string[];
+      targetParentId: string | null;
+    }) => {
+      const results = await Promise.allSettled(
+        folderIds.map((id) =>
+          fetch(`/api/folders/${id}/move`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ parentId: targetParentId }),
+          }).then((res) => {
+            if (!res.ok) throw new Error(`Failed to move ${id}`);
+          })
+        )
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      if (failed > 0) {
+        throw new Error(`Failed to move ${failed} of ${folderIds.length} projects`);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+    },
+  });
+}

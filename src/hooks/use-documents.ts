@@ -181,3 +181,64 @@ export function useMoveDocument() {
     },
   });
 }
+
+export function useBulkDeleteDocuments() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (documentIds: string[]) => {
+      // Delete sequentially to avoid overwhelming the server
+      const results = await Promise.allSettled(
+        documentIds.map((id) =>
+          fetch(`/api/documents/${id}`, { method: 'DELETE' }).then((res) => {
+            if (!res.ok) throw new Error(`Failed to delete ${id}`);
+          })
+        )
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      if (failed > 0) {
+        throw new Error(`Failed to delete ${failed} of ${documentIds.length} works`);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.documents.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.documents.recent });
+      queryClient.invalidateQueries({ queryKey: queryKeys.documents.favorites });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+    },
+  });
+}
+
+export function useBulkMoveDocuments() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      documentIds,
+      targetFolderId,
+    }: {
+      documentIds: string[];
+      targetFolderId: string | null;
+    }) => {
+      const results = await Promise.allSettled(
+        documentIds.map((id) =>
+          fetch(`/api/documents/${id}/move`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ folderId: targetFolderId }),
+          }).then((res) => {
+            if (!res.ok) throw new Error(`Failed to move ${id}`);
+          })
+        )
+      );
+      const failed = results.filter((r) => r.status === 'rejected').length;
+      if (failed > 0) {
+        throw new Error(`Failed to move ${failed} of ${documentIds.length} works`);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.documents.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+    },
+  });
+}
