@@ -14,13 +14,21 @@ import {
   Maximize,
   FileText,
   AlertCircle,
+  MapPin,
+  Camera,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  Mountain,
+  Ruler,
+  ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { queryKeys } from '@/lib/query-keys';
 import { useToggleFavorite } from '@/hooks/use-documents';
 import { cn } from '@/lib/utils';
-import type { DocumentData } from '@/types/api';
+import type { DocumentData, DocumentMetadata } from '@/types/api';
 
 const PdfViewer = dynamic(
   () => import('@/components/preview/pdf-viewer').then((mod) => mod.PdfViewer),
@@ -106,6 +114,129 @@ function usePinchZoom(
       el.removeEventListener('touchend', onTouchEnd);
     };
   }, [containerRef, zoom, setZoom]);
+}
+
+function MetadataPanel({ metadata }: { metadata: DocumentMetadata }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const hasLocation = metadata.latitude != null && metadata.longitude != null;
+  const hasCamera = metadata.cameraMake || metadata.cameraModel;
+  const hasDate = metadata.dateTaken;
+  const hasDimensions = metadata.imageWidth && metadata.imageHeight;
+  const hasAltitude = metadata.altitude != null;
+
+  const locationLabel = metadata.formattedAddress
+    || [metadata.city, metadata.state, metadata.country].filter(Boolean).join(', ')
+    || (hasLocation ? `${metadata.latitude}, ${metadata.longitude}` : null);
+
+  if (!hasLocation && !hasCamera && !hasDate) return null;
+
+  const mapsUrl = hasLocation
+    ? `https://www.google.com/maps?q=${metadata.latitude},${metadata.longitude}`
+    : null;
+
+  return (
+    <div className="border-t border-border bg-card/50 shrink-0">
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="flex items-center justify-between w-full px-4 py-3 text-sm text-foreground/80 hover:bg-accent/50 transition-colors"
+      >
+        <span className="flex items-center gap-2 font-medium">
+          <MapPin className="h-4 w-4 text-blue-500" />
+          Image Details
+        </span>
+        {expanded ? (
+          <ChevronUp className="h-4 w-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        )}
+      </button>
+
+      {expanded && (
+        <div className="px-4 pb-4 space-y-3">
+          {/* Location */}
+          {locationLabel && (
+            <div className="flex items-start gap-3">
+              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Location</p>
+                <p className="text-sm text-foreground break-words">{locationLabel}</p>
+                {hasLocation && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {metadata.latitude}°, {metadata.longitude}°
+                  </p>
+                )}
+              </div>
+              {mapsUrl && (
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-auto shrink-0 p-1.5 rounded-md hover:bg-accent text-blue-500"
+                  title="Open in Google Maps"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Altitude */}
+          {hasAltitude && (
+            <div className="flex items-start gap-3">
+              <Mountain className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-muted-foreground">Altitude</p>
+                <p className="text-sm text-foreground">{metadata.altitude} m</p>
+              </div>
+            </div>
+          )}
+
+          {/* Camera */}
+          {hasCamera && (
+            <div className="flex items-start gap-3">
+              <Camera className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-muted-foreground">Camera</p>
+                <p className="text-sm text-foreground">
+                  {[metadata.cameraMake, metadata.cameraModel].filter(Boolean).join(' ')}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Date taken */}
+          {hasDate && (
+            <div className="flex items-start gap-3">
+              <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-muted-foreground">Date Taken</p>
+                <p className="text-sm text-foreground">
+                  {new Date(metadata.dateTaken!).toLocaleString('en-IN', {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Dimensions */}
+          {hasDimensions && (
+            <div className="flex items-start gap-3">
+              <Ruler className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs text-muted-foreground">Dimensions</p>
+                <p className="text-sm text-foreground">
+                  {metadata.imageWidth} × {metadata.imageHeight} px
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function PreviewPage() {
@@ -391,6 +522,11 @@ export default function PreviewPage() {
           </div>
         )}
       </div>
+
+      {/* Metadata panel for images */}
+      {document?.metadata && (
+        <MetadataPanel metadata={document.metadata} />
+      )}
     </div>
   );
 }

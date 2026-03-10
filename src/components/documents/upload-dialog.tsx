@@ -22,7 +22,8 @@ import {
 } from '@/lib/constants';
 import { queryKeys } from '@/lib/query-keys';
 import { notifyUploadComplete, notifyUploadFailed } from '@/lib/notifications';
-import type { UploadUrlResponse } from '@/types/api';
+import { extractImageMetadata, reverseGeocode } from '@/lib/exif';
+import type { UploadUrlResponse, DocumentMetadata } from '@/types/api';
 
 interface UploadDialogProps {
   open: boolean;
@@ -158,7 +159,7 @@ export function UploadDialog({
         xhr.send(item.file);
       });
 
-      // Step 3: Confirm upload
+      // Step 3: Extract EXIF metadata (for images) while confirming
       setFiles((prev) =>
         prev.map((f) =>
           f.id === item.id
@@ -167,10 +168,24 @@ export function UploadDialog({
         )
       );
 
+      let metadata: DocumentMetadata | null = null;
+      try {
+        metadata = await extractImageMetadata(item.file);
+        // Reverse geocode if we have GPS coordinates
+        if (metadata?.latitude != null && metadata?.longitude != null) {
+          const geo = await reverseGeocode(metadata.latitude, metadata.longitude);
+          if (geo) {
+            metadata = { ...metadata, ...geo };
+          }
+        }
+      } catch {
+        // Non-critical — continue without metadata
+      }
+
       const confirmRes = await fetch('/api/documents/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, r2Key }),
+        body: JSON.stringify({ documentId, r2Key, metadata }),
         signal: abortController.signal,
       });
 

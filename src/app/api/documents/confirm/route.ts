@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   try {
     const userId = getUserId(request);
     const body = await request.json();
-    const { documentId, r2Key } = body;
+    const { documentId, r2Key, metadata } = body;
 
     if (!documentId || !r2Key) {
       return NextResponse.json(
@@ -48,13 +48,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Store metadata if provided
+    if (metadata && typeof metadata === 'object') {
+      await prisma.document.update({
+        where: { id: documentId },
+        data: { metadata },
+      });
+    }
+
     // Update user's freeUploadUsed to true if not already
     await prisma.user.update({
       where: { id: userId },
       data: { freeUploadUsed: true },
     });
 
-    return NextResponse.json({ document: serializeDocument(document) });
+    // Re-fetch to include metadata
+    const updatedDoc = await prisma.document.findUnique({
+      where: { id: documentId },
+    });
+
+    return NextResponse.json({ document: serializeDocument(updatedDoc || document) });
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

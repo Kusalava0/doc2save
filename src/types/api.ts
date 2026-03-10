@@ -30,6 +30,22 @@ export interface SubscriptionData {
   razorpaySubscriptionId: string | null;
 }
 
+export interface DocumentMetadata {
+  latitude?: number;
+  longitude?: number;
+  altitude?: number;
+  city?: string;
+  state?: string;
+  country?: string;
+  formattedAddress?: string;
+  cameraMake?: string;
+  cameraModel?: string;
+  dateTaken?: string;
+  gpsDirection?: number;
+  imageWidth?: number;
+  imageHeight?: number;
+}
+
 export interface DocumentData {
   id: string;
   name: string;
@@ -37,6 +53,7 @@ export interface DocumentData {
   size: number;
   folderId: string | null;
   isFavorite: boolean;
+  metadata: DocumentMetadata | null;
   uploadedAt: string;
 }
 

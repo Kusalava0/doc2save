@@ -53,6 +53,7 @@ export function ModalDispatcher() {
             size: 0,
             folderId: null,
             isFavorite: false,
+            metadata: null,
             uploadedAt: '',
           }}
           open
