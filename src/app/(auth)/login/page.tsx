@@ -235,7 +235,12 @@ export default function LoginPage() {
 
       const data = await response.json();
       setAuthenticated(data.user);
-      router.push('/dashboard');
+      // If Google user has no phone, prompt to link
+      if (!data.user.phone) {
+        router.push('/link-phone');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: unknown) {
       const firebaseErr = err as { code?: string; message?: string };
       let message = 'Google sign-in failed';
