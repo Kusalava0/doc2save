@@ -122,7 +122,11 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // 5. Update current user with info from source
+      // 5. Delete the source user first to free up unique constraints (phone/email)
+      //    Data was already transferred above, so cascade won't affect it
+      await tx.user.delete({ where: { id: sourceUser.id } });
+
+      // 6. Update current user with info from the (now-deleted) source
       const updated = await tx.user.update({
         where: { id: userId },
         data: {
@@ -131,14 +135,10 @@ export async function POST(request: NextRequest) {
           ...(sourceUser.name && !currentUser.name && {
             name: sourceUser.name,
           }),
-          // If either account used the free upload, mark it
           freeUploadUsed:
             currentUser.freeUploadUsed || sourceUser.freeUploadUsed,
         },
       });
-
-      // 6. Delete the source user (cascades won't affect transferred data)
-      await tx.user.delete({ where: { id: sourceUser.id } });
 
       return updated;
     });
