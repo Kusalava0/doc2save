@@ -18,10 +18,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Smartphone } from 'lucide-react';
+import { Smartphone, AlertTriangle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-type Step = 'phone' | 'otp';
+type Step = 'phone' | 'otp' | 'merge-confirm';
 
 export default function LinkPhonePage() {
   const router = useRouter();
@@ -34,7 +34,9 @@ export default function LinkPhonePage() {
   const [error, setLocalError] = useState('');
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [merging, setMerging] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [lastIdToken, setLastIdToken] = useState<string | null>(null);
 
   const confirmationResultRef = useRef<ConfirmationResult | null>(null);
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
@@ -156,6 +158,7 @@ export default function LinkPhonePage() {
     try {
       const credential = await confirmationResultRef.current.confirm(otp);
       const idToken = await credential.user.getIdToken();
+      setLastIdToken(idToken);
 
       // Link phone to existing account
       const res = await fetch('/api/auth/link-account', {
@@ -164,12 +167,19 @@ export default function LinkPhonePage() {
         body: JSON.stringify({ idToken }),
       });
 
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 409) {
+        // Phone belongs to another account — offer merge
+        setStep('merge-confirm');
+        setLocalError('');
+        return;
+      }
+
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         throw new Error(data.error || 'Failed to link phone number');
       }
 
-      const data = await res.json();
       updateUser({ phone: data.user.phone });
       toast.success('Phone number linked successfully!');
       router.push('/dashboard');
@@ -207,24 +217,92 @@ export default function LinkPhonePage() {
     router.push('/dashboard');
   };
 
+  const handleMerge = async () => {
+    if (!lastIdToken) {
+      setLocalError('Session expired. Please try again.');
+      setStep('phone');
+      return;
+    }
+    setMerging(true);
+    setLocalError('');
+    try {
+      const res = await fetch('/api/auth/merge-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: lastIdToken }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to merge accounts');
+      }
+      const data = await res.json();
+      updateUser({ phone: data.user.phone, email: data.user.email, name: data.user.name });
+      toast.success('Accounts merged successfully!');
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Merge failed';
+      setLocalError(message);
+    } finally {
+      setMerging(false);
+    }
+  };
+
   return (
     <>
       <Card className="border-border bg-card">
         <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600/10">
-            <Smartphone className="h-6 w-6 text-blue-500" />
+          <div className={`mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full ${step === 'merge-confirm' ? 'bg-amber-500/10' : 'bg-blue-600/10'}`}>
+            {step === 'merge-confirm' ? (
+              <AlertTriangle className="h-6 w-6 text-amber-500" />
+            ) : (
+              <Smartphone className="h-6 w-6 text-blue-500" />
+            )}
           </div>
           <CardTitle className="text-lg font-semibold text-foreground">
-            {step === 'phone' ? 'Link your phone number' : 'Verify OTP'}
+            {step === 'phone' ? 'Link your phone number' : step === 'otp' ? 'Verify OTP' : 'Account found'}
           </CardTitle>
           <CardDescription className="text-muted-foreground">
             {step === 'phone'
               ? 'Add your phone number for an additional way to sign in and account recovery.'
-              : `OTP sent to +91 ${phone}`}
+              : step === 'otp'
+                ? `OTP sent to +91 ${phone}`
+                : `+91 ${phone} is already linked to another account. Would you like to merge both accounts?`}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {step === 'phone' ? (
+          {step === 'merge-confirm' ? (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-foreground/80">
+                Merging will combine all projects, works, and subscription from both accounts into one.
+                The other account will be removed.
+              </div>
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Button
+                onClick={handleMerge}
+                disabled={merging}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              >
+                {merging && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                {merging ? 'Merging accounts...' : 'Merge Accounts'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => { setStep('phone'); setLocalError(''); }}
+                disabled={merging}
+                className="w-full border-border text-foreground/80 hover:bg-accent hover:text-foreground"
+              >
+                Use a different number
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleSkip}
+                disabled={merging}
+                className="w-full text-muted-foreground hover:text-foreground"
+              >
+                Skip for now
+              </Button>
+            </div>
+          ) : step === 'phone' ? (
             <form
               onSubmit={(e) => {
                 e.preventDefault();

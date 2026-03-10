@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAuthStore } from '@/stores/auth-store';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -59,16 +60,18 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   // Loading / idle / checking state
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">
-      <div className="space-y-4 text-center">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
+      <div className="flex flex-col items-center gap-5">
+        <Image
+          src="/icons/icon-192x192.png"
+          alt="AptsWorks"
+          width={72}
+          height={72}
+          className="rounded-2xl"
+          priority
+        />
+        <h1 className="text-xl font-bold tracking-tight text-transparent bg-clip-text bg-[length:200%_100%] animate-shimmer bg-[linear-gradient(110deg,var(--foreground)_35%,var(--muted-foreground)_50%,var(--foreground)_65%)]">
           AptsWorks
         </h1>
-        <div className="flex items-center justify-center gap-2">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-muted-foreground" />
-          <div className="h-2 w-2 animate-pulse rounded-full bg-muted-foreground [animation-delay:150ms]" />
-          <div className="h-2 w-2 animate-pulse rounded-full bg-muted-foreground [animation-delay:300ms]" />
-        </div>
-        <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
     </div>
   );

@@ -39,12 +39,14 @@ export default function SettingsPage() {
 
   // Phone linking state
   const [phoneLinkMode, setPhoneLinkMode] = useState(false);
-  const [phoneLinkStep, setPhoneLinkStep] = useState<'phone' | 'otp'>('phone');
+  const [phoneLinkStep, setPhoneLinkStep] = useState<'phone' | 'otp' | 'merge-confirm'>('phone');
   const [linkPhone, setLinkPhone] = useState('');
   const [linkOtp, setLinkOtp] = useState('');
   const [linkPhoneError, setLinkPhoneError] = useState('');
   const [sendingOtp, setSendingOtp] = useState(false);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [mergingAccount, setMergingAccount] = useState(false);
+  const [lastLinkIdToken, setLastLinkIdToken] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const confirmationResultRef = useRef<ConfirmationResult | null>(null);
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
@@ -133,16 +135,21 @@ export default function SettingsPage() {
     try {
       const credential = await confirmationResultRef.current.confirm(linkOtp);
       const idToken = await credential.user.getIdToken();
+      setLastLinkIdToken(idToken);
       const res = await fetch('/api/auth/link-account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 409) {
+        setPhoneLinkStep('merge-confirm');
+        setLinkPhoneError('');
+        return;
+      }
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         throw new Error(data.error || 'Failed to link phone number');
       }
-      const data = await res.json();
       updateUser({ phone: data.user.phone });
       queryClient.invalidateQueries({ queryKey: queryKeys.userProfile });
       toast.success('Phone number linked successfully!');
@@ -168,7 +175,43 @@ export default function SettingsPage() {
     setLinkPhone('');
     setLinkOtp('');
     setLinkPhoneError('');
+    setLastLinkIdToken(null);
     resetRecaptcha();
+  };
+
+  const handleMergeAccount = async () => {
+    if (!lastLinkIdToken) {
+      setLinkPhoneError('Session expired. Please try again.');
+      setPhoneLinkStep('phone');
+      return;
+    }
+    setMergingAccount(true);
+    setLinkPhoneError('');
+    try {
+      const res = await fetch('/api/auth/merge-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: lastLinkIdToken }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to merge accounts');
+      }
+      const data = await res.json();
+      updateUser({ phone: data.user.phone, email: data.user.email, name: data.user.name });
+      queryClient.invalidateQueries({ queryKey: queryKeys.userProfile });
+      toast.success('Accounts merged successfully!');
+      setPhoneLinkMode(false);
+      setPhoneLinkStep('phone');
+      setLinkPhone('');
+      setLinkOtp('');
+      setLastLinkIdToken(null);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Merge failed';
+      setLinkPhoneError(message);
+    } finally {
+      setMergingAccount(false);
+    }
   };
 
   const handleSaveName = async () => {
@@ -380,7 +423,7 @@ export default function SettingsPage() {
                       </Button>
                     </div>
                   </>
-                ) : (
+                ) : phoneLinkStep === 'otp' ? (
                   <>
                     <p className="text-xs text-muted-foreground">OTP sent to +91 {linkPhone}</p>
                     <Input
@@ -420,6 +463,35 @@ export default function SettingsPage() {
                       >
                         {resendCooldown > 0 ? `${resendCooldown}s` : 'Resend'}
                       </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs text-amber-500 font-medium">
+                      +91 {linkPhone} is already linked to another account.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Merging will combine all projects, works, and subscription into this account.
+                    </p>
+                    {linkPhoneError && <p className="text-xs text-red-500">{linkPhoneError}</p>}
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleMergeAccount}
+                        disabled={mergingAccount}
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8"
+                      >
+                        {mergingAccount ? 'Merging...' : 'Merge Accounts'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleCancelPhoneLink}
+                        disabled={mergingAccount}
+                        className="text-muted-foreground text-xs h-8"
+                      >
+                        Cancel
+                      </Button>
                     </div>
                   </>
                 )}

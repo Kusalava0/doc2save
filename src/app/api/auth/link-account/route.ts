@@ -40,7 +40,14 @@ export async function POST(request: NextRequest) {
       const existing = await prisma.user.findUnique({ where: { phone } });
       if (existing && existing.id !== userId) {
         return NextResponse.json(
-          { error: "This phone number is already linked to another account" },
+          {
+            error: "This phone number is already linked to another account",
+            code: "CONFLICT_PHONE",
+            conflictAccount: {
+              hasDocuments: await prisma.document.count({ where: { userId: existing.id } }) > 0,
+              hasFolders: await prisma.folder.count({ where: { userId: existing.id } }) > 0,
+            },
+          },
           { status: 409 }
         );
       }
@@ -50,7 +57,14 @@ export async function POST(request: NextRequest) {
       const existing = await prisma.user.findUnique({ where: { email } });
       if (existing && existing.id !== userId) {
         return NextResponse.json(
-          { error: "This email is already linked to another account" },
+          {
+            error: "This email is already linked to another account",
+            code: "CONFLICT_EMAIL",
+            conflictAccount: {
+              hasDocuments: await prisma.document.count({ where: { userId: existing.id } }) > 0,
+              hasFolders: await prisma.folder.count({ where: { userId: existing.id } }) > 0,
+            },
+          },
           { status: 409 }
         );
       }
