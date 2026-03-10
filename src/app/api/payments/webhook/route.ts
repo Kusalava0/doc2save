@@ -16,12 +16,26 @@ export async function POST(request: NextRequest) {
     // Read raw body for signature verification
     const body = await request.text();
 
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      console.error('[Webhook] RAZORPAY_WEBHOOK_SECRET is not configured');
+      return NextResponse.json(
+        { error: 'Webhook verification unavailable' },
+        { status: 500 }
+      );
+    }
+
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET!)
+      .createHmac('sha256', webhookSecret)
       .update(body)
       .digest('hex');
 
-    if (expectedSignature !== receivedSignature) {
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(expectedSignature, 'hex'),
+      Buffer.from(receivedSignature, 'hex')
+    );
+
+    if (!isValid) {
       console.error('[Webhook] Invalid signature');
       return NextResponse.json(
         { error: 'Invalid webhook signature' },
