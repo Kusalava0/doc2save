@@ -167,7 +167,7 @@ export default function AdminUserDetailPage() {
           </div>
           <div className="flex items-center gap-3 text-sm">
             <FileText className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Documents:</span>
+            <span className="text-muted-foreground">Works:</span>
             <span className="text-foreground/80">{user.documentCount}</span>
           </div>
           <div className="flex items-center gap-3 text-sm">

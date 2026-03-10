@@ -1,7 +1,7 @@
 {
   "name": "AptsWorks",
   "short_name": "AptsWorks",
-  "description": "Secure cloud document storage for real estate professionals. Upload, organize, and access your documents from anywhere.",
+  "description": "Secure cloud storage for real estate professionals. Upload, organize, and access your works from anywhere.",
   "id": "/dashboard",
   "start_url": "/dashboard",
   "scope": "/",

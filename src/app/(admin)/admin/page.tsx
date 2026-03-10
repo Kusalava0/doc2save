@@ -55,7 +55,7 @@ const statCards = [
   },
   {
     key: 'totalDocuments' as const,
-    label: 'Total Documents',
+    label: 'Total Works',
     icon: FileText,
     format: (v: number) => v.toLocaleString(),
     color: 'text-purple-400',

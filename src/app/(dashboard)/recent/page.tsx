@@ -14,7 +14,7 @@ export default function RecentPage() {
         documents={documents}
         isLoading={isLoading}
         emptyMessage="No recent activity"
-        emptyDescription="Your recently viewed and edited documents will appear here."
+        emptyDescription="Your recently viewed and edited works will appear here."
       />
     </div>
   );

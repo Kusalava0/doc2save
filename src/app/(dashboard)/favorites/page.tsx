@@ -15,7 +15,7 @@ export default function FavoritesPage() {
         documents={documents}
         isLoading={isLoading}
         emptyMessage="No favorites yet"
-        emptyDescription="Star documents to see them here."
+        emptyDescription="Star works to see them here."
       />
     </div>
   );

@@ -51,7 +51,7 @@ function SearchContent() {
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16">
           <Search className="h-10 w-10 text-muted-foreground/50 mb-3" />
           <h3 className="text-base font-medium text-foreground mb-1">
-            Search your documents & folders
+            Search your works & projects
           </h3>
           <p className="text-sm text-muted-foreground text-center max-w-sm">
             Type at least 2 characters to start searching.
@@ -65,7 +65,7 @@ function SearchContent() {
               <div className="flex items-center gap-2">
                 <FolderOpen className="h-4 w-4 text-muted-foreground" />
                 <h2 className="text-sm font-medium text-muted-foreground">
-                  Folders ({folders.length})
+                  Projects ({folders.length})
                 </h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -85,7 +85,7 @@ function SearchContent() {
               documents={documents}
               isLoading={isLoading}
               emptyMessage="No results found"
-              emptyDescription={`No documents or folders matching "${debouncedQuery}".`}
+              emptyDescription={`No works or projects matching "${debouncedQuery}".`}
             />
           </div>
         </div>

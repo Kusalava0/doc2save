@@ -203,9 +203,9 @@ export default function PreviewPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4 gap-4">
         <AlertCircle className="h-12 w-12 text-red-500" />
-        <h2 className="text-lg font-semibold text-foreground">Document not found</h2>
+        <h2 className="text-lg font-semibold text-foreground">Work not found</h2>
         <p className="text-sm text-muted-foreground text-center max-w-md">
-          {error instanceof Error ? error.message : 'Failed to load document'}
+          {error instanceof Error ? error.message : 'Failed to load work'}
         </p>
         <Button
           variant="outline"
@@ -351,7 +351,7 @@ export default function PreviewPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
-                alt={document?.name || 'Document preview'}
+                alt={document?.name || 'Work preview'}
                 style={{
                   width: zoom === 1 ? '100%' : `${containerWidth * zoom}px`,
                   maxWidth: zoom === 1 ? '100%' : 'none',

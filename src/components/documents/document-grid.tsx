@@ -48,8 +48,8 @@ function ListSkeleton() {
 export function DocumentGrid({
   documents,
   isLoading,
-  emptyMessage = 'No documents yet',
-  emptyDescription = 'Upload your first document to get started.',
+  emptyMessage = 'No works yet',
+  emptyDescription = 'Upload your first work to get started.',
 }: DocumentGridProps) {
   const viewMode = useUIStore((s) => s.viewMode);
 

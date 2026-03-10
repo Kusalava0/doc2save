@@ -31,10 +31,10 @@ export function DeleteDocumentDialog({
   const handleDelete = async () => {
     try {
       await deleteDoc.mutateAsync(doc.id);
-      toast.success('Document deleted');
+      toast.success('Work deleted');
       onOpenChange(false);
     } catch (err: any) {
-      toast.error(err.message || 'Failed to delete document');
+      toast.error(err.message || 'Failed to delete work');
     }
   };
 
@@ -43,7 +43,7 @@ export function DeleteDocumentDialog({
       <AlertDialogContent className="bg-background border-border">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-foreground">
-            Delete Document
+            Delete Work
           </AlertDialogTitle>
           <AlertDialogDescription className="text-muted-foreground">
             Are you sure you want to delete{' '}

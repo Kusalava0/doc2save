@@ -263,7 +263,7 @@ export function UploadDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="bg-background border-border text-foreground sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-foreground">Upload Documents</DialogTitle>
+          <DialogTitle className="text-foreground">Upload Works</DialogTitle>
         </DialogHeader>
 
         {/* Drop zone */}

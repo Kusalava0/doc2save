@@ -94,7 +94,7 @@ export function SearchBar({ onClose, autoFocus }: SearchBarProps) {
           }}
           onFocus={() => query.length >= 2 && setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Search documents & folders..."
+          placeholder="Search works & projects..."
           className="pl-9 pr-8 bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-ring h-9"
         />
         {query && (
@@ -127,7 +127,7 @@ export function SearchBar({ onClose, autoFocus }: SearchBarProps) {
               {folders.length > 0 && (
                 <div>
                   <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Folders
+                    Projects
                   </div>
                   {folders.slice(0, 5).map((folder) => (
                     <button
@@ -139,7 +139,7 @@ export function SearchBar({ onClose, autoFocus }: SearchBarProps) {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-foreground truncate">{folder.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {folder._count.documents} docs, {folder._count.children} subfolders
+                          {folder._count.documents} works, {folder._count.children} subprojects
                         </p>
                       </div>
                     </button>
@@ -154,7 +154,7 @@ export function SearchBar({ onClose, autoFocus }: SearchBarProps) {
                     <div className="border-t border-border" />
                   )}
                   <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Documents
+                    Works
                   </div>
                   {documents.slice(0, 8).map((doc) => (
                     <button

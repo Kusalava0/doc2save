@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
-  FileText,
   LogOut,
   Shield,
 } from 'lucide-react';
@@ -35,7 +35,7 @@ export function Sidebar() {
     <div className="flex h-full w-60 flex-col bg-background border-r border-border">
       {/* Brand */}
       <div className="flex h-14 items-center gap-2 px-4">
-        <FileText className="h-6 w-6 text-blue-500" />
+        <Image src="/icons/icon-192x192.png" alt="AptsWorks" width={28} height={28} className="rounded" />
         <span className="text-lg font-bold text-foreground tracking-tight">
           AptsWorks
         </span>

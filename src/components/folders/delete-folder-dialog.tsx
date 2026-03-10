@@ -31,10 +31,10 @@ export function DeleteFolderDialog({
   const handleDelete = async () => {
     try {
       await deleteFolder.mutateAsync(folder.id);
-      toast.success('Folder deleted');
+      toast.success('Project deleted');
       onOpenChange(false);
     } catch (err: any) {
-      toast.error(err.message || 'Failed to delete folder');
+      toast.error(err.message || 'Failed to delete project');
     }
   };
 
@@ -43,12 +43,12 @@ export function DeleteFolderDialog({
       <AlertDialogContent className="bg-background border-border">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-foreground">
-            Delete Folder
+            Delete Project
           </AlertDialogTitle>
           <AlertDialogDescription className="text-muted-foreground">
             Are you sure you want to delete{' '}
             <span className="font-medium text-foreground/80">{folder.name}</span>?
-            This will permanently delete all documents inside this folder.
+            This will permanently delete all works inside this project.
             This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>

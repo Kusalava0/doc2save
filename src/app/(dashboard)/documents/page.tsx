@@ -25,7 +25,7 @@ export default function DocumentsPage() {
     <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">My Documents</h1>
+        <h1 className="text-2xl font-bold text-foreground">My Works</h1>
         <div className="flex items-center gap-2">
           {/* View toggle */}
           <div className="hidden sm:flex items-center rounded-lg border border-border p-0.5">
@@ -59,7 +59,7 @@ export default function DocumentsPage() {
             className="border-border bg-card text-foreground/80 hover:bg-accent hover:text-foreground"
           >
             <FolderPlus className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">New Folder</span>
+            <span className="hidden sm:inline">New Project</span>
           </Button>
 
           <Button
@@ -86,7 +86,7 @@ export default function DocumentsPage() {
 
       {!foldersLoading && folders && folders.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">Folders</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Projects</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {folders.map((folder) => (
               <FolderCard key={folder.id} folder={folder} />
@@ -98,13 +98,13 @@ export default function DocumentsPage() {
       {/* Documents */}
       <div className="space-y-3">
         {(!foldersLoading && folders && folders.length > 0) && (
-          <h2 className="text-sm font-medium text-muted-foreground">Documents</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Works</h2>
         )}
         <DocumentGrid
           documents={documents}
           isLoading={documentsLoading}
-          emptyMessage="No documents yet"
-          emptyDescription="Upload your first document to get started. We support PDF, images, and common document formats."
+          emptyMessage="No works yet"
+          emptyDescription="Upload your first work to get started. We support PDF, images, and common work formats."
         />
       </div>
 

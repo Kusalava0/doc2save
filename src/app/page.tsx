@@ -40,7 +40,7 @@ export default function HomePage() {
             </div>
             <h3 className="font-semibold">Cloud Storage</h3>
             <p className="text-sm text-muted-foreground">
-              Upload PDFs, images, and documents securely to the cloud.
+              Upload PDFs, images, and works securely to the cloud.
             </p>
           </div>
           <div className="flex flex-col items-center gap-3">

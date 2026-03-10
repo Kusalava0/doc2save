@@ -35,11 +35,11 @@ export function CreateFolderDialog({
 
     try {
       await createFolder.mutateAsync({ name: trimmed, parentId: parentId ?? null });
-      toast.success('Folder created');
+      toast.success('Project created');
       setName('');
       onOpenChange(false);
     } catch (err: any) {
-      toast.error(err.message || 'Failed to create folder');
+      toast.error(err.message || 'Failed to create project');
     }
   };
 
@@ -52,13 +52,13 @@ export function CreateFolderDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="bg-background border-border text-foreground sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground">New Folder</DialogTitle>
+          <DialogTitle className="text-foreground">New Project</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Folder name"
+            placeholder="Project name"
             autoFocus
             className="bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
           />

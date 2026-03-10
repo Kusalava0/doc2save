@@ -12,7 +12,7 @@ import {
 
 export const dashboardNavItems = [
   { href: '/dashboard', icon: Home, label: 'Home' },
-  { href: '/documents', icon: FileText, label: 'Documents' },
+  { href: '/documents', icon: FileText, label: 'Works' },
   { href: '/favorites', icon: Star, label: 'Favorites' },
   { href: '/recent', icon: Clock, label: 'Recent' },
   { href: '/subscription', icon: CreditCard, label: 'Subscription' },
@@ -21,7 +21,7 @@ export const dashboardNavItems = [
 
 export const mobileNavItems = [
   { href: '/dashboard', icon: Home, label: 'Home' },
-  { href: '/documents', icon: FileText, label: 'Docs' },
+  { href: '/documents', icon: FileText, label: 'Works' },
   { href: '/favorites', icon: Star, label: 'Favorites' },
   { href: '/recent', icon: Clock, label: 'Recent' },
   { href: '/settings', icon: Settings, label: 'Settings' },

@@ -75,7 +75,7 @@ export function MoveDialog({
         });
       }
       toast.success(
-        `${itemType === 'document' ? 'Document' : 'Folder'} moved successfully`
+        `${itemType === 'document' ? 'Work' : 'Project'} moved successfully`
       );
       onOpenChange(false);
     } catch (err: unknown) {
@@ -98,10 +98,10 @@ export function MoveDialog({
       <DialogContent className="bg-background border-border max-w-md">
         <DialogHeader>
           <DialogTitle className="text-foreground">
-            Move {itemType === 'document' ? 'Document' : 'Folder'}
+            Move {itemType === 'document' ? 'Work' : 'Project'}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Select a destination folder.
+            Select a destination project.
           </DialogDescription>
         </DialogHeader>
 
@@ -142,7 +142,7 @@ export function MoveDialog({
             </div>
           ) : folders.length === 0 ? (
             <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">
-              No subfolders here
+              No subprojects here
             </div>
           ) : (
             <div className="divide-y divide-border">

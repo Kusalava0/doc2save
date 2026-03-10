@@ -40,10 +40,10 @@ export function RenameFolderDialog({
 
     try {
       await renameFolder.mutateAsync({ folderId: folder.id, name: trimmed });
-      toast.success('Folder renamed');
+      toast.success('Project renamed');
       onOpenChange(false);
     } catch (err: any) {
-      toast.error(err.message || 'Failed to rename folder');
+      toast.error(err.message || 'Failed to rename project');
     }
   };
 
@@ -51,13 +51,13 @@ export function RenameFolderDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-background border-border text-foreground sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground">Rename Folder</DialogTitle>
+          <DialogTitle className="text-foreground">Rename Project</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Folder name"
+            placeholder="Project name"
             autoFocus
             className="bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-ring"
           />

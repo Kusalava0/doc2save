@@ -41,9 +41,9 @@ export default function DashboardPage() {
 
   const stats = [
     {
-      title: 'Total Documents',
+      title: 'Total Works',
       value: profileLoading ? null : (profile?.documentCount ?? 0).toString(),
-      description: 'Uploaded documents',
+      description: 'Uploaded works',
       icon: FileText,
     },
     {
@@ -72,7 +72,7 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">{greeting}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage your real estate documents securely.
+          Manage your work documents securely securely.
         </p>
       </div>
 
@@ -112,7 +112,7 @@ export default function DashboardPage() {
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Upload className="h-4 w-4 mr-2" />
-            Upload Document
+            Upload Work
           </Button>
           <Button
             asChild
@@ -121,7 +121,7 @@ export default function DashboardPage() {
           >
             <Link href="/documents">
               <FolderOpen className="h-4 w-4 mr-2" />
-              Browse Documents
+              Browse Works
             </Link>
           </Button>
         </div>
@@ -178,7 +178,7 @@ export default function DashboardPage() {
               <div className="flex flex-col items-center justify-center py-10">
                 <Clock className="h-10 w-10 text-zinc-600 mb-3" />
                 <p className="text-sm text-muted-foreground">
-                  No recent uploads. Upload your first document to get started.
+                  No recent uploads. Upload your first work to get started.
                 </p>
               </div>
             )}

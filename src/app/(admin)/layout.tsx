@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
-  FileText,
   LogOut,
   Shield,
   ArrowLeft,
@@ -31,7 +31,7 @@ function AdminSidebar() {
     <div className="flex h-full w-60 flex-col bg-background border-r border-border">
       {/* Brand */}
       <div className="flex h-14 items-center gap-2 px-4">
-        <FileText className="h-6 w-6 text-blue-500" />
+        <Image src="/icons/icon-192x192.png" alt="AptsWorks" width={28} height={28} className="rounded" />
         <span className="text-lg font-bold text-foreground tracking-tight">
           AptsWorks
         </span>
@@ -143,7 +143,7 @@ export default function AdminLayout({
           <div className="flex flex-1 flex-col min-w-0">
             {/* Mobile header */}
             <div className="flex h-14 items-center gap-2 px-4 border-b border-border md:hidden">
-              <FileText className="h-5 w-5 text-blue-500" />
+              <Image src="/icons/icon-192x192.png" alt="AptsWorks" width={24} height={24} className="rounded" />
               <span className="font-bold text-foreground">AptsWorks</span>
               <Badge className="bg-red-600/20 text-red-400 border-red-600/30 text-xs">
                 Admin

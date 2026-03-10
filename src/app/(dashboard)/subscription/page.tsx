@@ -286,7 +286,7 @@ export default function SubscriptionPage() {
                       Your subscription will remain active until the end of the
                       current billing period
                       {formattedEndDate ? ` (${formattedEndDate})` : ''}. After
-                      that, you will not be able to upload new documents.
+                      that, you will not be able to upload new works.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

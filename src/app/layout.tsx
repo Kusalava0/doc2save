@@ -16,10 +16,11 @@ export const metadata: Metadata = {
     default: "AptsWorks",
     template: "%s | AptsWorks",
   },
-  description: "Secure cloud document storage for real estate professionals. Upload, organize, and access your documents from anywhere.",
+  description: "Secure cloud storage for real estate professionals. Upload, organize, and access your works from anywhere.",
   manifest: "/manifest.json",
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
@@ -28,15 +29,15 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "AptsWorks",
-    title: "AptsWorks — Secure Cloud Document Storage",
-    description: "Upload, organize, and access your real estate documents from anywhere. Mobile-first, secure, and always available.",
+    title: "AptsWorks — Secure Cloud Storage",
+    description: "Upload, organize, and access your real estate works from anywhere. Mobile-first, secure, and always available.",
     url: "https://aptsworks.in",
     images: [{ url: "/icons/icon-512x512.png", width: 512, height: 512, alt: "AptsWorks" }],
   },
   twitter: {
     card: "summary",
-    title: "AptsWorks — Secure Cloud Document Storage",
-    description: "Upload, organize, and access your real estate documents from anywhere.",
+    title: "AptsWorks — Secure Cloud Storage",
+    description: "Upload, organize, and access your real estate works from anywhere.",
     images: ["/icons/icon-512x512.png"],
   },
   appleWebApp: {

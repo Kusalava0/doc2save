@@ -48,10 +48,10 @@ export default function FolderPage() {
       <div className="p-4 md:p-6">
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20">
           <h3 className="text-lg font-medium text-foreground mb-1">
-            Folder not found
+            Project not found
           </h3>
           <p className="text-sm text-muted-foreground">
-            This folder may have been deleted or moved.
+            This project may have been deleted or moved.
           </p>
         </div>
       </div>
@@ -98,7 +98,7 @@ export default function FolderPage() {
             className="border-border bg-card text-foreground/80 hover:bg-accent hover:text-foreground"
           >
             <FolderPlus className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">New Folder</span>
+            <span className="hidden sm:inline">New Project</span>
           </Button>
 
           <Button
@@ -114,7 +114,7 @@ export default function FolderPage() {
       {/* Subfolders */}
       {data.subfolders.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">Folders</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Projects</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {data.subfolders.map((folder) => (
               <FolderCard key={folder.id} folder={folder} />
@@ -126,12 +126,12 @@ export default function FolderPage() {
       {/* Documents */}
       <div className="space-y-3">
         {data.subfolders.length > 0 && (
-          <h2 className="text-sm font-medium text-muted-foreground">Documents</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Works</h2>
         )}
         <DocumentGrid
           documents={data.documents}
-          emptyMessage="No documents in this folder"
-          emptyDescription="Upload documents or move files into this folder."
+          emptyMessage="No works in this project"
+          emptyDescription="Upload works or move files into this project."
         />
       </div>
 

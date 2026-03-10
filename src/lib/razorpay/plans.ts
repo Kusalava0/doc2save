@@ -18,11 +18,11 @@ export const MONTHLY_PLAN: Plan = {
   period: 'monthly',
   interval: 1,
   features: [
-    'Unlimited document uploads',
+    'Unlimited work uploads',
     'Up to 50 MB per file',
     'PDF, JPEG, PNG, HEIC, DOCX support',
-    'Organize with folders',
-    'Favorite and search documents',
+    'Organize with projects',
+    'Favorite and search works',
     'Secure cloud storage',
   ],
 };

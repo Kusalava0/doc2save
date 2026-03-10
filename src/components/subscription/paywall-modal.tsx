@@ -23,7 +23,7 @@ interface PaywallModalProps {
 }
 
 const FEATURES = [
-  'Unlimited document uploads',
+  'Unlimited work uploads',
   'Up to 50 MB per file',
   'PDF, JPEG, PNG, HEIC, DOCX support',
   'Secure cloud storage',
