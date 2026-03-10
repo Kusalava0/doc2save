@@ -67,12 +67,12 @@ const STATUS_OPTIONS = ['ALL', 'ACTIVE', 'CANCELLED', 'CREATED', 'EXPIRED', 'HAL
 function getStatusBadgeClasses(status: string): string {
   switch (status) {
     case 'ACTIVE':
-      return 'bg-green-600/20 text-green-400 border-green-600/30';
+      return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-600/20 dark:text-green-400 dark:border-green-600/30';
     case 'CANCELLED':
-      return 'bg-yellow-600/20 text-yellow-400 border-yellow-600/30';
+      return 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-600/20 dark:text-yellow-400 dark:border-yellow-600/30';
     case 'EXPIRED':
     case 'HALTED':
-      return 'bg-red-600/20 text-red-400 border-red-600/30';
+      return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-600/20 dark:text-red-400 dark:border-red-600/30';
     default:
       return 'bg-muted text-muted-foreground';
   }

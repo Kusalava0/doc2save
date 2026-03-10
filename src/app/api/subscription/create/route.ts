@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Razorpay subscription
-    const totalCount = 12;
+    // With 6-month interval, totalCount=4 allows up to 2 years of renewals
+    const totalCount = 4;
     const razorpaySubscription = await razorpay.subscriptions.create({
       plan_id: plan.id,
       total_count: totalCount,

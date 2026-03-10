@@ -66,10 +66,13 @@ export function Topbar() {
         </div>
       ) : (
         <>
-          {/* Mobile: centered title */}
-          <span className="flex-1 text-center text-base font-semibold text-foreground md:hidden">
+          {/* Mobile: centered title (absolute so it's truly centered) */}
+          <span className="absolute left-1/2 -translate-x-1/2 text-base font-semibold text-foreground md:hidden pointer-events-none">
             AptsWorks
           </span>
+
+          {/* Spacer to push icons right */}
+          <div className="flex-1 md:hidden" />
 
           {/* Mobile: search icon */}
           <Button

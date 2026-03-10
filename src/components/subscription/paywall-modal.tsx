@@ -70,7 +70,7 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
         subscription_id: subscriptionId,
         name: 'AptsWorks',
-        description: `Monthly Subscription - Rs ${SUBSCRIPTION_AMOUNT}`,
+        description: `Half-Yearly Subscription - Rs ${SUBSCRIPTION_AMOUNT}`,
         handler: () => {
           setCheckoutState('success');
           toast.success('Subscription activated successfully!');
@@ -137,7 +137,7 @@ export function PaywallModal({ open, onOpenChange }: PaywallModalProps) {
             <span className="text-3xl font-bold text-foreground">
               Rs {SUBSCRIPTION_AMOUNT}
             </span>
-            <span className="text-muted-foreground ml-1">/month</span>
+            <span className="text-muted-foreground ml-1">/6 months</span>
           </div>
 
           <div className="space-y-2">

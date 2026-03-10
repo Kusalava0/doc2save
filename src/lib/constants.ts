@@ -32,5 +32,5 @@ export const MAX_CONCURRENT_UPLOADS = 3;
 export const SESSION_COOKIE_NAME = 'doc2save_session';
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days in seconds
 
-export const SUBSCRIPTION_AMOUNT = 500;
-export const SUBSCRIPTION_AMOUNT_PAISE = 50000;
+export const SUBSCRIPTION_AMOUNT = 1000;
+export const SUBSCRIPTION_AMOUNT_PAISE = 100000;

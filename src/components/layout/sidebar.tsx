@@ -84,7 +84,7 @@ export function Sidebar() {
             className={cn(
               'ml-auto text-xs',
               isActive
-                ? 'bg-green-900/50 text-green-400 border border-green-800'
+                ? 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/50 dark:text-green-400 dark:border-green-800'
                 : 'bg-muted text-foreground/80'
             )}
           >

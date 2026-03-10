@@ -102,7 +102,7 @@ export default function SubscriptionPage() {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
         subscription_id: subscriptionId,
         name: 'AptsWorks',
-        description: `${PLAN.name} Plan — ₹${PLAN.amountDisplay}/mo`,
+        description: `${PLAN.name} Plan — ₹${PLAN.amountDisplay}/${PLAN.billingLabel}`,
         handler: async (response: { razorpay_payment_id?: string; razorpay_subscription_id?: string; razorpay_signature?: string }) => {
           try {
             setCheckoutState('success');
@@ -238,12 +238,12 @@ export default function SubscriptionPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-foreground">Active Plan</CardTitle>
-                <Badge className="bg-green-600/20 text-green-400 border-green-600/30">
+                <Badge className="bg-green-100 text-green-700 border-green-200 dark:bg-green-600/20 dark:text-green-400 dark:border-green-600/30">
                   Active
                 </Badge>
               </div>
               <CardDescription className="text-muted-foreground">
-                Your subscription is active — ₹{PLAN.amountDisplay}/month.
+                Your subscription is active — ₹{PLAN.amountDisplay}/{PLAN.billingLabel}.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -312,7 +312,7 @@ export default function SubscriptionPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-foreground">Subscription</CardTitle>
-                    <Badge className="bg-yellow-600/20 text-yellow-400 border-yellow-600/30">
+                    <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-600/20 dark:text-yellow-400 dark:border-yellow-600/30">
                       Cancelled
                     </Badge>
                   </div>
@@ -344,7 +344,7 @@ export default function SubscriptionPage() {
                   <span className="text-4xl font-bold text-foreground">
                     ₹{PLAN.amountDisplay}
                   </span>
-                  <span className="text-muted-foreground text-sm">/month</span>
+                  <span className="text-muted-foreground text-sm">/{PLAN.billingLabel}</span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -373,7 +373,7 @@ export default function SubscriptionPage() {
                         : 'Processing...'}
                     </>
                   ) : (
-                    `Subscribe — ₹${PLAN.amountDisplay}/mo`
+                    `Subscribe — ₹${PLAN.amountDisplay}/${PLAN.billingLabel}`
                   )}
                 </Button>
 

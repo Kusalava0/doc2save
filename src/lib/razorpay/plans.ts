@@ -6,17 +6,19 @@ export interface Plan {
   currency: string;
   period: 'monthly';
   interval: number;
+  billingLabel: string; // e.g. "6 months"
   features: string[];
 }
 
-export const MONTHLY_PLAN: Plan = {
+export const HALF_YEARLY_PLAN: Plan = {
   id: process.env.RAZORPAY_PLAN_ID!,
-  name: 'Monthly',
-  amount: 50000,
-  amountDisplay: 500,
+  name: 'Half-Yearly',
+  amount: 100000,
+  amountDisplay: 1000,
   currency: 'INR',
   period: 'monthly',
-  interval: 1,
+  interval: 6,
+  billingLabel: '6 months',
   features: [
     'Unlimited work uploads',
     'Up to 50 MB per file',
@@ -28,8 +30,8 @@ export const MONTHLY_PLAN: Plan = {
 };
 
 // Single plan export
-export const PLAN = MONTHLY_PLAN;
-export const PLANS: Plan[] = [MONTHLY_PLAN];
+export const PLAN = HALF_YEARLY_PLAN;
+export const PLANS: Plan[] = [HALF_YEARLY_PLAN];
 
 export function getPlanById(planId: string): Plan | undefined {
   return PLANS.find((p) => p.id === planId);

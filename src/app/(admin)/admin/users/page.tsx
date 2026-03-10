@@ -140,7 +140,7 @@ export default function AdminUsersPage() {
                               variant="secondary"
                               className={
                                 user.role === 'ADMIN'
-                                  ? 'bg-red-600/20 text-red-400 border-red-600/30'
+                                  ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-600/20 dark:text-red-400 dark:border-red-600/30'
                                   : 'bg-muted text-muted-foreground'
                               }
                             >
@@ -149,11 +149,11 @@ export default function AdminUsersPage() {
                           </TableCell>
                           <TableCell>
                             {user.isBlocked ? (
-                              <Badge className="bg-red-600/20 text-red-400 border-red-600/30">
+                              <Badge className="bg-red-100 text-red-700 border-red-200 dark:bg-red-600/20 dark:text-red-400 dark:border-red-600/30">
                                 Blocked
                               </Badge>
                             ) : (
-                              <Badge className="bg-green-600/20 text-green-400 border-green-600/30">
+                              <Badge className="bg-green-100 text-green-700 border-green-200 dark:bg-green-600/20 dark:text-green-400 dark:border-green-600/30">
                                 Active
                               </Badge>
                             )}
@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
                               <Badge
                                 className={
                                   user.subscription.status === 'ACTIVE'
-                                    ? 'bg-green-600/20 text-green-400 border-green-600/30'
+                                    ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-600/20 dark:text-green-400 dark:border-green-600/30'
                                     : 'bg-muted text-muted-foreground'
                                 }
                               >

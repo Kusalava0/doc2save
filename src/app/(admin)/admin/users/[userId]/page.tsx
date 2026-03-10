@@ -130,14 +130,14 @@ export default function AdminUserDetailPage() {
           <Badge
             className={
               user.role === 'ADMIN'
-                ? 'bg-red-600/20 text-red-400 border-red-600/30'
+                ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-600/20 dark:text-red-400 dark:border-red-600/30'
                 : 'bg-muted text-muted-foreground'
             }
           >
             {user.role}
           </Badge>
           {user.isBlocked && (
-            <Badge className="bg-red-600/20 text-red-400 border-red-600/30">
+            <Badge className="bg-red-100 text-red-700 border-red-200 dark:bg-red-600/20 dark:text-red-400 dark:border-red-600/30">
               Blocked
             </Badge>
           )}
@@ -193,9 +193,9 @@ export default function AdminUserDetailPage() {
                 <Badge
                   className={
                     user.subscription.status === 'ACTIVE'
-                      ? 'bg-green-600/20 text-green-400 border-green-600/30'
+                      ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-600/20 dark:text-green-400 dark:border-green-600/30'
                       : user.subscription.status === 'CANCELLED'
-                        ? 'bg-yellow-600/20 text-yellow-400 border-yellow-600/30'
+                        ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-600/20 dark:text-yellow-400 dark:border-yellow-600/30'
                         : 'bg-muted text-muted-foreground'
                   }
                 >
@@ -245,8 +245,8 @@ export default function AdminUserDetailPage() {
             disabled={blockUser.isPending}
             className={
               user.isBlocked
-                ? 'border-green-700 text-green-400 hover:bg-green-900/20'
-                : 'border-red-700 text-red-400 hover:bg-red-900/20'
+                ? 'border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20'
+                : 'border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20'
             }
           >
             {blockUser.isPending ? (
