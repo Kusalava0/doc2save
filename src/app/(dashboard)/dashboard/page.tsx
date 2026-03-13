@@ -5,9 +5,11 @@ import {
   FileText,
   FolderOpen,
   Upload,
-  HardDrive,
   CreditCard,
   Clock,
+  Receipt,
+  UserCheck,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,21 +22,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/auth-store';
 import { useUIStore } from '@/stores/ui-store';
 import { useUser } from '@/hooks/use-user';
-import { useRecentDocuments } from '@/hooks/use-documents';
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-}
+import { useRecentDocuments, useTaggedDocument } from '@/hooks/use-documents';
+import { formatDateShort } from '@/lib/format';
 
 export default function DashboardPage() {
   const { auth } = useAuthStore();
   const openModal = useUIStore((s) => s.openModal);
   const { data: profile, isLoading: profileLoading } = useUser();
   const { data: recentDocs, isLoading: recentLoading } = useRecentDocuments();
+  const { data: gstDoc, isLoading: gstLoading } = useTaggedDocument('gst');
+  const { data: contractorDoc, isLoading: contractorLoading } = useTaggedDocument('contractor-registration');
 
   const user = auth.status === 'authenticated' ? auth.user : null;
   const greeting = user?.name ? `Welcome back, ${user.name}` : 'Welcome back';
@@ -45,14 +42,6 @@ export default function DashboardPage() {
       value: profileLoading ? null : (profile?.documentCount ?? 0).toString(),
       description: 'Uploaded works',
       icon: FileText,
-    },
-    {
-      title: 'Storage Used',
-      value: profileLoading
-        ? null
-        : formatBytes(profile?.storageUsedBytes ?? 0),
-      description: 'Cloud storage',
-      icon: HardDrive,
     },
     {
       title: 'Subscription',
@@ -70,14 +59,14 @@ export default function DashboardPage() {
     <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">{greeting}</h1>
+        <h1 className="text-xl font-bold text-foreground">{greeting}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage your work documents securely securely.
+          Manage your work documents securely.
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-2">
         {stats.map((stat) => (
           <Card
             key={stat.title}
@@ -95,12 +84,119 @@ export default function DashboardPage() {
               {stat.value === null ? (
                 <Skeleton className="h-8 w-20 bg-muted" />
               ) : (
-                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="text-lg font-bold">{stat.value}</div>
               )}
               <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Upload Cards */}
+      <div className="grid gap-4 grid-cols-2">
+        {/* GST Card */}
+        {gstLoading ? (
+          <Card className="bg-card border-border">
+            <CardContent className="flex items-center gap-3 p-3">
+              <Skeleton className="h-9 w-9 rounded-lg" />
+              <div className="space-y-1">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </CardContent>
+          </Card>
+        ) : gstDoc ? (
+          <Link href={`/preview/${gstDoc.id}`}>
+            <Card className="bg-card border-border text-foreground cursor-pointer hover:border-green-500/50 transition-colors">
+              <CardContent className="flex items-center gap-3 p-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-600/10">
+                  <Receipt className="h-4 w-4 text-green-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{gstDoc.name}</p>
+                  <p className="text-xs text-muted-foreground">GST Certificate</p>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openModal({ type: 'delete-document', documentId: gstDoc.id, documentName: gstDoc.name });
+                  }}
+                  className="p-1 rounded-md shrink-0 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </CardContent>
+            </Card>
+          </Link>
+        ) : (
+          <Card
+            className="bg-card border-border text-foreground cursor-pointer hover:border-blue-500/50 transition-colors"
+            onClick={() => openModal({ type: 'upload', dashboardTag: 'gst' })}
+          >
+            <CardContent className="flex items-center gap-3 p-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-600/10">
+                <Receipt className="h-4 w-4 text-blue-500" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">Upload GST</p>
+                <p className="text-xs text-muted-foreground truncate">GST certificate</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Contractor Registration Card */}
+        {contractorLoading ? (
+          <Card className="bg-card border-border">
+            <CardContent className="flex items-center gap-3 p-3">
+              <Skeleton className="h-9 w-9 rounded-lg" />
+              <div className="space-y-1">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </CardContent>
+          </Card>
+        ) : contractorDoc ? (
+          <Link href={`/preview/${contractorDoc.id}`}>
+            <Card className="bg-card border-border text-foreground cursor-pointer hover:border-green-500/50 transition-colors">
+              <CardContent className="flex items-center gap-3 p-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-600/10">
+                  <UserCheck className="h-4 w-4 text-green-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{contractorDoc.name}</p>
+                  <p className="text-xs text-muted-foreground">Contractor Reg.</p>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openModal({ type: 'delete-document', documentId: contractorDoc.id, documentName: contractorDoc.name });
+                  }}
+                  className="p-1 rounded-md shrink-0 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </CardContent>
+            </Card>
+          </Link>
+        ) : (
+          <Card
+            className="bg-card border-border text-foreground cursor-pointer hover:border-blue-500/50 transition-colors"
+            onClick={() => openModal({ type: 'upload', dashboardTag: 'contractor-registration' })}
+          >
+            <CardContent className="flex items-center gap-3 p-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-600/10">
+                <UserCheck className="h-4 w-4 text-blue-500" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">Contractor Reg.</p>
+                <p className="text-xs text-muted-foreground truncate">Upload registration</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Quick Actions */}
@@ -168,7 +264,7 @@ export default function DashboardPage() {
                         {doc.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {formatBytes(doc.size)}
+                        {formatDateShort(doc.uploadedAt)}
                       </p>
                     </div>
                   </Link>

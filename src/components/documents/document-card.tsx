@@ -28,9 +28,10 @@ import { useUIStore } from '@/stores/ui-store';
 import { useToggleFavorite } from '@/hooks/use-documents';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { FileIcon } from '@/components/shared/file-icon';
-import { formatFileSize, formatDate } from '@/lib/format';
+import { formatDateShort } from '@/lib/format';
 import { useLongPress } from '@/hooks/use-long-press';
 import { cn } from '@/lib/utils';
+import { ExpiryDatePicker } from '@/components/documents/expiry-date-picker';
 import type { DocumentData } from '@/types/api';
 
 interface DocumentCardProps {
@@ -49,6 +50,13 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
   const [isStarring, setIsStarring] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 767px)');
+
+  const isExpiringSoon = doc.expiryDate
+    ? (() => {
+      const days = Math.ceil((new Date(doc.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      return days <= 7;
+    })()
+    : false;
 
   const isSelected = selectedDocumentIds.has(doc.id);
 
@@ -288,12 +296,16 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
         <span className="flex-1 text-sm text-foreground truncate min-w-0">
           {doc.name}
         </span>
-        <span className="hidden sm:block text-xs text-muted-foreground w-20 text-right">
-          {formatFileSize(doc.size)}
+        <span className="text-xs text-muted-foreground shrink-0">
+          {formatDateShort(doc.uploadedAt)}
         </span>
-        <span className="hidden md:block text-xs text-muted-foreground w-28 text-right">
-          {formatDate(doc.uploadedAt)}
-        </span>
+        {!selectionMode && (
+          <ExpiryDatePicker
+            documentId={doc.id}
+            expiryDate={doc.expiryDate}
+            isExpiringSoon={isExpiringSoon}
+          />
+        )}
         {!selectionMode && (
           <>
             <button
@@ -322,21 +334,21 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
       onClick={handleClick}
       {...longPressHandlers}
       className={cn(
-        'group relative rounded-xl border border-border bg-card p-4 hover:border-border transition-colors cursor-pointer select-none',
+        'group relative rounded-xl border border-border bg-card p-3 hover:border-border transition-colors cursor-pointer select-none',
         selectionMode && isSelected && 'border-blue-500 bg-blue-600/10'
       )}
     >
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-2">
         {selectionMode ? (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {selectionCheckbox}
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <FileIcon mimeType={doc.mimeType} className="h-5 w-5" />
+            <div className="h-7 w-7 rounded-md bg-primary/10 flex items-center justify-center">
+              <FileIcon mimeType={doc.mimeType} className="h-4 w-4" />
             </div>
           </div>
         ) : (
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <FileIcon mimeType={doc.mimeType} className="h-5 w-5" />
+          <div className="h-7 w-7 rounded-md bg-primary/10 flex items-center justify-center">
+            <FileIcon mimeType={doc.mimeType} className="h-4 w-4" />
           </div>
         )}
         {!selectionMode && (
@@ -362,10 +374,15 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
       <p className="text-sm font-medium text-foreground truncate mb-1">
         {doc.name}
       </p>
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <span>{formatFileSize(doc.size)}</span>
-        <span className="text-zinc-700">&middot;</span>
-        <span>{formatDate(doc.uploadedAt)}</span>
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">{formatDateShort(doc.uploadedAt)}</span>
+        {!selectionMode && (
+          <ExpiryDatePicker
+            documentId={doc.id}
+            expiryDate={doc.expiryDate}
+            isExpiringSoon={isExpiringSoon}
+          />
+        )}
       </div>
     </div>
   );

@@ -71,6 +71,59 @@ export function useGlobalSearch(query: string) {
   });
 }
 
+export function useExpiringDocuments(days: number = 7) {
+  return useQuery({
+    queryKey: [...queryKeys.documents.all, 'expiring', days] as const,
+    queryFn: async () => {
+      const res = await fetchJson<{ documents: (DocumentData & { folder?: { id: string; name: string } | null })[] }>(
+        `/api/documents/expiring?days=${days}`
+      );
+      return res.documents;
+    },
+  });
+}
+
+export function useTaggedDocument(tag: string) {
+  return useQuery({
+    queryKey: queryKeys.documents.tagged(tag),
+    queryFn: async () => {
+      const res = await fetchJson<{ document: DocumentData | null }>(
+        `/api/documents/tagged?tag=${encodeURIComponent(tag)}`
+      );
+      return res.document;
+    },
+  });
+}
+
+export function useUpdateDocument() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      documentId,
+      expiryDate,
+    }: {
+      documentId: string;
+      expiryDate: string | null;
+    }) => {
+      const res = await fetch(`/api/documents/${documentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expiryDate }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({ error: 'Update failed' }));
+        throw new Error(body.error || 'Update failed');
+      }
+      return res.json() as Promise<{ document: DocumentData }>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.documents.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
+    },
+  });
+}
+
 export function useDeleteDocument() {
   const queryClient = useQueryClient();
 

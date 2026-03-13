@@ -8,6 +8,7 @@ export const queryKeys = {
     recent: ['recent-documents'] as const,
     favorites: ['favorite-documents'] as const,
     search: (query: string) => ['search-documents', query] as const,
+    tagged: (tag: string) => ['documents', 'tagged', tag] as const,
   },
 
   folders: {

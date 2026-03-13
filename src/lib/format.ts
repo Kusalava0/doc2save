@@ -12,3 +12,7 @@ export function formatFileSize(bytes: number): string {
 export function formatDate(dateString: string): string {
   return format(new Date(dateString), 'MMM d, yyyy');
 }
+
+export function formatDateShort(dateString: string): string {
+  return format(new Date(dateString), "d MMM ''yy");
+}

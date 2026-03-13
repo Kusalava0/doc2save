@@ -35,6 +35,9 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Default document folders created inside every new root project
+const DEFAULT_SUBFOLDERS = ['LOA', 'Agreement', 'MBook', 'EMD', 'EOT'];
+
 // POST /api/folders — Create a new folder
 export async function POST(request: NextRequest) {
   try {
@@ -72,6 +75,32 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Create default subfolders for root-level projects
+    if (!parentId) {
+      await prisma.folder.createMany({
+        data: DEFAULT_SUBFOLDERS.map((subName) => ({
+          name: subName,
+          parentId: folder.id,
+          userId,
+        })),
+      });
+
+      // Re-fetch to get updated children count
+      const updatedFolder = await prisma.folder.findUnique({
+        where: { id: folder.id },
+        include: {
+          _count: {
+            select: {
+              documents: true,
+              children: true,
+            },
+          },
+        },
+      });
+
+      return NextResponse.json({ folder: updatedFolder }, { status: 201 });
+    }
 
     return NextResponse.json({ folder }, { status: 201 });
   } catch (error) {

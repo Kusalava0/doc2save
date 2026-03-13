@@ -44,6 +44,7 @@ export interface DocumentMetadata {
   gpsDirection?: number;
   imageWidth?: number;
   imageHeight?: number;
+  dashboardTag?: string;
 }
 
 export interface DocumentData {
@@ -54,6 +55,7 @@ export interface DocumentData {
   folderId: string | null;
   isFavorite: boolean;
   metadata: DocumentMetadata | null;
+  expiryDate: string | null;
   uploadedAt: string;
 }
 

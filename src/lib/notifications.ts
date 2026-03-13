@@ -64,6 +64,15 @@ export function notifySubscriptionExpiring(daysLeft: number) {
   });
 }
 
+export function notifyEmdExpiring(documentName: string, daysLeft: number) {
+  sendNotification('EMD Expiring Soon', {
+    body: daysLeft <= 0
+      ? `EMD "${documentName}" has expired. Take action immediately.`
+      : `EMD "${documentName}" expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}. Renew or take action.`,
+    tag: `emd-expiring-${documentName}`,
+  });
+}
+
 export function notifyStorageWarning(usedPercent: number) {
   sendNotification('Storage Almost Full', {
     body: `You've used ${usedPercent}% of your storage. Consider deleting old documents.`,

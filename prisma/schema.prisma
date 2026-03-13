@@ -62,6 +62,7 @@ model Document {
   userId        String   @map("user_id")
   isFavorite    Boolean  @default(false) @map("is_favorite")
   metadata      Json?    @db.JsonB
+  expiryDate    DateTime? @map("expiry_date")
   uploadedAt    DateTime @default(now()) @map("uploaded_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 

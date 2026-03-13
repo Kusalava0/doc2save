@@ -8,7 +8,7 @@ export type SelectionType = 'documents' | 'folders' | null;
 
 export type ModalType =
   | { type: 'none' }
-  | { type: 'upload'; folderId?: string }
+  | { type: 'upload'; folderId?: string; dashboardTag?: string }
   | { type: 'create-folder'; parentId?: string }
   | { type: 'rename-folder'; folderId: string; currentName: string }
   | { type: 'rename-document'; documentId: string; currentName: string }

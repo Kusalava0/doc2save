@@ -39,6 +39,45 @@ export async function GET(
   }
 }
 
+// PATCH /api/documents/[documentId] — Update document (e.g. expiry date)
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ documentId: string }> },
+) {
+  try {
+    const userId = getUserId(request);
+    const { documentId } = await params;
+    const body = await request.json();
+
+    const document = await prisma.document.findFirst({
+      where: { id: documentId, userId },
+    });
+
+    if (!document) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+    }
+
+    const data: { expiryDate?: Date | null } = {};
+
+    if ('expiryDate' in body) {
+      data.expiryDate = body.expiryDate ? new Date(body.expiryDate) : null;
+    }
+
+    const updated = await prisma.document.update({
+      where: { id: documentId },
+      data,
+    });
+
+    return NextResponse.json({ document: serializeDocument(updated) });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    console.error('PATCH /api/documents/[documentId] error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 // DELETE /api/documents/[documentId] — Delete document
 export async function DELETE(
   request: NextRequest,

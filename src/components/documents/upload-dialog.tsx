@@ -29,6 +29,7 @@ interface UploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   folderId?: string | null;
+  dashboardTag?: string | null;
 }
 
 interface UploadItem {
@@ -44,6 +45,7 @@ export function UploadDialog({
   open,
   onOpenChange,
   folderId,
+  dashboardTag,
 }: UploadDialogProps) {
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<UploadItem[]>([]);
@@ -182,10 +184,15 @@ export function UploadDialog({
         // Non-critical — continue without metadata
       }
 
+      // Include dashboardTag in metadata if provided
+      const finalMetadata = dashboardTag
+        ? { ...(metadata || {}), dashboardTag }
+        : metadata;
+
       const confirmRes = await fetch('/api/documents/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId, r2Key, metadata }),
+        body: JSON.stringify({ documentId, r2Key, metadata: finalMetadata }),
         signal: abortController.signal,
       });
 
@@ -255,6 +262,9 @@ export function UploadDialog({
     queryClient.invalidateQueries({ queryKey: queryKeys.documents.recent });
     queryClient.invalidateQueries({ queryKey: queryKeys.folders.all });
     queryClient.invalidateQueries({ queryKey: queryKeys.userProfile });
+    if (dashboardTag) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.documents.tagged(dashboardTag) });
+    }
 
     const successCount = files.filter((f) => f.status === 'success').length;
     if (successCount > 0) {

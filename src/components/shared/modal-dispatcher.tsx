@@ -20,6 +20,7 @@ export function ModalDispatcher() {
           open
           onOpenChange={(open) => !open && closeModal()}
           folderId={activeModal.folderId}
+          dashboardTag={activeModal.dashboardTag}
         />
       );
 
@@ -54,6 +55,7 @@ export function ModalDispatcher() {
             folderId: null,
             isFavorite: false,
             metadata: null,
+            expiryDate: null,
             uploadedAt: '',
           }}
           open
