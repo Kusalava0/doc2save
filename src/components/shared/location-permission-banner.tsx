@@ -16,13 +16,13 @@ export function LocationPermissionBanner() {
     if (hasAskedLocationPermission()) return;
     if (!('geolocation' in navigator)) return;
 
-    // Pre-check: if already granted or denied, no banner needed
+    // Pre-check: if already granted, no banner needed
     getLocationPermissionState().then((state) => {
-      if (state === 'granted' || state === 'denied') {
+      if (state === 'granted') {
         localStorage.setItem('doc2save-location-asked', 'true');
         return;
       }
-      // State is 'prompt' or 'unknown' — show the banner after a delay
+      // Show the banner — user needs to click Allow for the browser prompt
       setTimeout(() => setVisible(true), 6000);
     });
   }, []);
