@@ -1,4 +1,5 @@
 const PERMISSION_KEY = 'doc2save-notif-asked';
+const LOCATION_PERMISSION_KEY = 'doc2save-location-asked';
 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) return false;
@@ -39,6 +40,25 @@ export function sendNotification(title: string, options?: NotificationOptions) {
       ...options,
     });
   }
+}
+
+export function hasAskedLocationPermission(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(LOCATION_PERMISSION_KEY) === 'true';
+}
+
+export async function requestLocationPermission(): Promise<boolean> {
+  if (!('geolocation' in navigator)) return false;
+
+  localStorage.setItem(LOCATION_PERMISSION_KEY, 'true');
+
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      () => resolve(true),
+      () => resolve(false),
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  });
 }
 
 export function notifyUploadComplete(fileName: string) {

@@ -23,7 +23,7 @@ import {
 import { queryKeys } from '@/lib/query-keys';
 import { notifyUploadComplete, notifyUploadFailed } from '@/lib/notifications';
 import { extractImageMetadata, reverseGeocode } from '@/lib/exif';
-import { DocumentScanner, type ScanLocation } from '@/components/documents/document-scanner';
+import { DocumentScanner } from '@/components/documents/document-scanner';
 import type { UploadUrlResponse, DocumentMetadata } from '@/types/api';
 
 interface UploadDialogProps {
@@ -40,7 +40,6 @@ interface UploadItem {
   progress: number;
   error?: string;
   abortController?: AbortController;
-  scanLocation?: ScanLocation;
 }
 
 export function UploadDialog({
@@ -54,28 +53,6 @@ export function UploadDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [mode, setMode] = useState<'upload' | 'scan'>('upload');
   const activeUploadsRef = useRef(0);
-  const locationRef = useRef<ScanLocation | undefined>(undefined);
-  const locationRequestedRef = useRef(false);
-
-  // Request location on user gesture (not useEffect — Chrome silently
-  // denies geolocation without a recent user interaction)
-  const requestLocationOnGesture = useCallback(() => {
-    if (locationRequestedRef.current || !navigator.geolocation) return;
-    locationRequestedRef.current = true;
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        locationRef.current = {
-          latitude: Math.round(pos.coords.latitude * 1000000) / 1000000,
-          longitude: Math.round(pos.coords.longitude * 1000000) / 1000000,
-        };
-      },
-      () => {
-        // Permission denied or unavailable — proceed without location
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
-  }, []);
 
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: any[]) => {
@@ -93,7 +70,6 @@ export function UploadDialog({
         file,
         status: 'pending' as const,
         progress: 0,
-        scanLocation: locationRef.current,
       }));
 
       setFiles((prev) => [...prev, ...newItems]);
@@ -109,7 +85,6 @@ export function UploadDialog({
     ),
     maxSize: MAX_FILE_SIZE,
     disabled: isUploading,
-    onFileDialogOpen: requestLocationOnGesture,
   });
 
   const removeFile = (id: string) => {
@@ -211,24 +186,6 @@ export function UploadDialog({
         // Non-critical — continue without metadata
       }
 
-      // Inject scan location if EXIF didn't have GPS
-      if (item.scanLocation && (!metadata?.latitude || !metadata?.longitude)) {
-        metadata = {
-          ...(metadata || {}),
-          latitude: item.scanLocation.latitude,
-          longitude: item.scanLocation.longitude,
-        };
-        // Reverse geocode the injected location
-        try {
-          const geo = await reverseGeocode(item.scanLocation.latitude, item.scanLocation.longitude);
-          if (geo) {
-            metadata = { ...metadata, ...geo };
-          }
-        } catch {
-          // Non-critical
-        }
-      }
-
       // Include dashboardTag in metadata if provided
       const finalMetadata = dashboardTag
         ? { ...(metadata || {}), dashboardTag }
@@ -325,7 +282,6 @@ export function UploadDialog({
       file,
       status: 'pending',
       progress: 0,
-      scanLocation: locationRef.current,
     };
     setFiles((prev) => [...prev, newItem]);
     setMode('upload');
@@ -353,7 +309,7 @@ export function UploadDialog({
         {files.length === 0 && !isUploading && (
           <div className="flex rounded-lg bg-muted p-1 gap-1">
             <button
-              onClick={() => { setMode('upload'); requestLocationOnGesture(); }}
+              onClick={() => setMode('upload')}
               className={`flex-1 flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 mode === 'upload'
                   ? 'bg-background text-foreground shadow-sm'
@@ -364,7 +320,7 @@ export function UploadDialog({
               Upload File
             </button>
             <button
-              onClick={() => { setMode('scan'); requestLocationOnGesture(); }}
+              onClick={() => setMode('scan')}
               className={`flex-1 flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 mode === 'scan'
                   ? 'bg-background text-foreground shadow-sm'

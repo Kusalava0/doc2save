@@ -6,7 +6,9 @@ import { useUser } from '@/hooks/use-user';
 import { useExpiringDocuments } from '@/hooks/use-documents';
 import {
   requestNotificationPermission,
+  requestLocationPermission,
   hasAskedPermission,
+  hasAskedLocationPermission,
   canNotify,
   notifySubscriptionExpiring,
   notifyStorageWarning,
@@ -27,10 +29,18 @@ export function useNotifications() {
   // Prompt for notification permission on first authenticated load
   useEffect(() => {
     if (!profile || hasAskedPermission()) return;
-    // Ask after a short delay so it doesn't feel intrusive
     const timer = setTimeout(() => {
       requestNotificationPermission();
     }, 5000);
+    return () => clearTimeout(timer);
+  }, [profile]);
+
+  // Prompt for location permission on first authenticated load
+  useEffect(() => {
+    if (!profile || hasAskedLocationPermission()) return;
+    const timer = setTimeout(() => {
+      requestLocationPermission();
+    }, 8000);
     return () => clearTimeout(timer);
   }, [profile]);
 
