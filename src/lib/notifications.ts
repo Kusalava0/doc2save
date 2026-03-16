@@ -50,6 +50,20 @@ export function hasAskedLocationPermission(): boolean {
 export async function requestLocationPermission(): Promise<boolean> {
   if (!('geolocation' in navigator)) return false;
 
+  // Only request if browser will actually show a prompt
+  if (navigator.permissions) {
+    try {
+      const status = await navigator.permissions.query({ name: 'geolocation' });
+      if (status.state !== 'prompt') {
+        // Already granted or denied — no prompt will appear, don't mark as asked
+        // so we can retry if user resets permissions later
+        return status.state === 'granted';
+      }
+    } catch {
+      // Permissions API not supported — try anyway
+    }
+  }
+
   return new Promise((resolve) => {
     navigator.geolocation.getCurrentPosition(
       () => {
