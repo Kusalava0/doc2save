@@ -186,6 +186,27 @@ export function UploadDialog({
         // Non-critical — continue without metadata
       }
 
+      // Fallback: if no GPS in EXIF, use browser geolocation
+      if (!metadata?.latitude && !metadata?.longitude && 'geolocation' in navigator) {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: false,
+              timeout: 5000,
+            });
+          });
+          const lat = Math.round(pos.coords.latitude * 1000000) / 1000000;
+          const lng = Math.round(pos.coords.longitude * 1000000) / 1000000;
+          metadata = { ...(metadata || {}), latitude: lat, longitude: lng };
+          const geo = await reverseGeocode(lat, lng);
+          if (geo) {
+            metadata = { ...metadata, ...geo };
+          }
+        } catch {
+          // Location unavailable — proceed without it
+        }
+      }
+
       // Include dashboardTag in metadata if provided
       const finalMetadata = dashboardTag
         ? { ...(metadata || {}), dashboardTag }
