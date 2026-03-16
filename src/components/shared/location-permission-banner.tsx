@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { MapPin, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-  requestLocationPermission,
   getLocationPermissionState,
   hasAskedLocationPermission,
 } from '@/lib/notifications';
@@ -29,9 +28,19 @@ export function LocationPermissionBanner() {
 
   if (!visible) return null;
 
-  // No async, no await — getCurrentPosition fires directly from the click gesture
+  // Call getCurrentPosition directly — no wrappers, no promises between click and the API
   const handleAllow = () => {
-    requestLocationPermission().then(() => setVisible(false));
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        localStorage.setItem('doc2save-location-asked', 'true');
+        setVisible(false);
+      },
+      () => {
+        localStorage.setItem('doc2save-location-asked', 'true');
+        setVisible(false);
+      },
+      { enableHighAccuracy: false, timeout: 10000 },
+    );
   };
 
   const handleDismiss = () => {
