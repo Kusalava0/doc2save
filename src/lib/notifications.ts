@@ -50,12 +50,16 @@ export function hasAskedLocationPermission(): boolean {
 export async function requestLocationPermission(): Promise<boolean> {
   if (!('geolocation' in navigator)) return false;
 
-  localStorage.setItem(LOCATION_PERMISSION_KEY, 'true');
-
   return new Promise((resolve) => {
     navigator.geolocation.getCurrentPosition(
-      () => resolve(true),
-      () => resolve(false),
+      () => {
+        localStorage.setItem(LOCATION_PERMISSION_KEY, 'true');
+        resolve(true);
+      },
+      () => {
+        localStorage.setItem(LOCATION_PERMISSION_KEY, 'true');
+        resolve(false);
+      },
       { enableHighAccuracy: true, timeout: 10000 },
     );
   });

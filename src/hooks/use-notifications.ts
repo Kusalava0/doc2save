@@ -26,21 +26,20 @@ export function useNotifications() {
   const { data: expiringDocs } = useExpiringDocuments(EMD_WARNING_DAYS);
   const hasChecked = useRef(false);
 
-  // Prompt for notification permission on first authenticated load
+  // Prompt for permissions on first authenticated load
+  // Chain them so browser doesn't suppress overlapping prompts
   useEffect(() => {
-    if (!profile || hasAskedPermission()) return;
-    const timer = setTimeout(() => {
-      requestNotificationPermission();
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [profile]);
+    if (!profile) return;
 
-  // Prompt for location permission on first authenticated load
-  useEffect(() => {
-    if (!profile || hasAskedLocationPermission()) return;
-    const timer = setTimeout(() => {
-      requestLocationPermission();
-    }, 8000);
+    const timer = setTimeout(async () => {
+      if (!hasAskedPermission()) {
+        await requestNotificationPermission();
+      }
+      if (!hasAskedLocationPermission()) {
+        await requestLocationPermission();
+      }
+    }, 5000);
+
     return () => clearTimeout(timer);
   }, [profile]);
 
