@@ -23,7 +23,7 @@ import {
 import { queryKeys } from '@/lib/query-keys';
 import { notifyUploadComplete, notifyUploadFailed } from '@/lib/notifications';
 import { extractImageMetadata, reverseGeocode } from '@/lib/exif';
-import { DocumentScanner } from '@/components/documents/document-scanner';
+import { DocumentScanner, type ScanLocation } from '@/components/documents/document-scanner';
 import type { UploadUrlResponse, DocumentMetadata } from '@/types/api';
 
 interface UploadDialogProps {
@@ -40,6 +40,7 @@ interface UploadItem {
   progress: number;
   error?: string;
   abortController?: AbortController;
+  scanLocation?: ScanLocation;
 }
 
 export function UploadDialog({
@@ -186,6 +187,24 @@ export function UploadDialog({
         // Non-critical — continue without metadata
       }
 
+      // Inject scan location if EXIF didn't have GPS
+      if (item.scanLocation && (!metadata?.latitude || !metadata?.longitude)) {
+        metadata = {
+          ...(metadata || {}),
+          latitude: item.scanLocation.latitude,
+          longitude: item.scanLocation.longitude,
+        };
+        // Reverse geocode the injected location
+        try {
+          const geo = await reverseGeocode(item.scanLocation.latitude, item.scanLocation.longitude);
+          if (geo) {
+            metadata = { ...metadata, ...geo };
+          }
+        } catch {
+          // Non-critical
+        }
+      }
+
       // Include dashboardTag in metadata if provided
       const finalMetadata = dashboardTag
         ? { ...(metadata || {}), dashboardTag }
@@ -276,12 +295,13 @@ export function UploadDialog({
     }
   };
 
-  const handleScanComplete = useCallback((file: File) => {
+  const handleScanComplete = useCallback((file: File, location?: ScanLocation) => {
     const newItem: UploadItem = {
       id: `${file.name}-${Date.now()}-${Math.random()}`,
       file,
       status: 'pending',
       progress: 0,
+      scanLocation: location,
     };
     setFiles((prev) => [...prev, newItem]);
     setMode('upload');
