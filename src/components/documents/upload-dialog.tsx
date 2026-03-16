@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useQueryClient } from '@tanstack/react-query';
-import { Upload, X, Loader2, Check, File } from 'lucide-react';
+import { Upload, X, Loader2, Check, File, ScanLine } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -23,6 +23,7 @@ import {
 import { queryKeys } from '@/lib/query-keys';
 import { notifyUploadComplete, notifyUploadFailed } from '@/lib/notifications';
 import { extractImageMetadata, reverseGeocode } from '@/lib/exif';
+import { DocumentScanner } from '@/components/documents/document-scanner';
 import type { UploadUrlResponse, DocumentMetadata } from '@/types/api';
 
 interface UploadDialogProps {
@@ -50,6 +51,7 @@ export function UploadDialog({
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<UploadItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [mode, setMode] = useState<'upload' | 'scan'>('upload');
   const activeUploadsRef = useRef(0);
 
   const onDrop = useCallback(
@@ -274,9 +276,21 @@ export function UploadDialog({
     }
   };
 
+  const handleScanComplete = useCallback((file: File) => {
+    const newItem: UploadItem = {
+      id: `${file.name}-${Date.now()}-${Math.random()}`,
+      file,
+      status: 'pending',
+      progress: 0,
+    };
+    setFiles((prev) => [...prev, newItem]);
+    setMode('upload');
+  }, []);
+
   const handleClose = (open: boolean) => {
     if (isUploading) return; // Prevent closing during upload
     setFiles([]);
+    setMode('upload');
     onOpenChange(open);
   };
 
@@ -291,30 +305,68 @@ export function UploadDialog({
           <DialogTitle className="text-foreground">Upload Works</DialogTitle>
         </DialogHeader>
 
-        {/* Drop zone */}
-        <div
-          {...getRootProps()}
-          className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
-            isDragActive
-              ? 'border-blue-500 bg-blue-500/10'
-              : 'border-border hover:border-zinc-600'
-          } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
-        >
-          <input {...getInputProps()} />
-          <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-          {isDragActive ? (
-            <p className="text-sm text-blue-400">Drop files here...</p>
-          ) : (
-            <>
-              <p className="text-sm text-foreground/80 mb-1">
-                Drag & drop files here, or click to browse
-              </p>
-              <p className="text-xs text-muted-foreground">
-                PDF, JPEG, PNG, HEIC, DOCX up to 50MB
-              </p>
-            </>
-          )}
-        </div>
+        {/* Mode tabs */}
+        {files.length === 0 && !isUploading && (
+          <div className="flex rounded-lg bg-muted p-1 gap-1">
+            <button
+              onClick={() => setMode('upload')}
+              className={`flex-1 flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                mode === 'upload'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Upload className="h-4 w-4" />
+              Upload File
+            </button>
+            <button
+              onClick={() => setMode('scan')}
+              className={`flex-1 flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                mode === 'scan'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <ScanLine className="h-4 w-4" />
+              Scan Document
+            </button>
+          </div>
+        )}
+
+        {/* Scanner mode */}
+        {mode === 'scan' && files.length === 0 && (
+          <DocumentScanner
+            onComplete={handleScanComplete}
+            onCancel={() => setMode('upload')}
+          />
+        )}
+
+        {/* Drop zone (upload mode) */}
+        {mode === 'upload' && (
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
+              isDragActive
+                ? 'border-blue-500 bg-blue-500/10'
+                : 'border-border hover:border-zinc-600'
+            } ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+          >
+            <input {...getInputProps()} />
+            <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+            {isDragActive ? (
+              <p className="text-sm text-blue-400">Drop files here...</p>
+            ) : (
+              <>
+                <p className="text-sm text-foreground/80 mb-1">
+                  Drag & drop files here, or click to browse
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  PDF, JPEG, PNG, HEIC, DOCX up to 50MB
+                </p>
+              </>
+            )}
+          </div>
+        )}
 
         {/* File list */}
         {files.length > 0 && (
@@ -360,7 +412,7 @@ export function UploadDialog({
                     />
                   )}
                 </div>
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   {item.status === 'success' ? (
                     <Check className="h-4 w-4 text-green-400" />
                   ) : item.status === 'uploading' ||
@@ -392,8 +444,8 @@ export function UploadDialog({
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex justify-end gap-2 pt-2">
+        {/* Actions (only in upload mode or when files exist) */}
+        {mode === 'upload' && <div className="flex justify-end gap-2 pt-2">
           {allDone ? (
             <Button
               onClick={() => handleClose(false)}
@@ -430,7 +482,7 @@ export function UploadDialog({
               </Button>
             </>
           )}
-        </div>
+        </div>}
       </DialogContent>
     </Dialog>
   );

@@ -10,6 +10,8 @@ import {
   Move,
   Eye,
   CheckSquare,
+  MapPin,
+  Camera,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,6 +52,17 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
   const [isStarring, setIsStarring] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 767px)');
+
+  const metadataLine = (() => {
+    const m = doc.metadata;
+    if (!m) return null;
+    const parts: string[] = [];
+    if (m.city || m.state) parts.push([m.city, m.state].filter(Boolean).join(', '));
+    else if (m.formattedAddress) parts.push(m.formattedAddress.split(',').slice(0, 2).join(','));
+    if (m.cameraMake || m.cameraModel) parts.push([m.cameraMake, m.cameraModel].filter(Boolean).join(' '));
+    if (m.imageWidth && m.imageHeight) parts.push(`${m.imageWidth}×${m.imageHeight}`);
+    return parts.length > 0 ? parts : null;
+  })();
 
   const isExpiringSoon = doc.expiryDate
     ? (() => {
@@ -299,6 +312,12 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
         <span className="text-xs text-muted-foreground shrink-0">
           {formatDateShort(doc.uploadedAt)}
         </span>
+        {metadataLine && (doc.metadata?.city || doc.metadata?.state || doc.metadata?.formattedAddress) && (
+          <span className="text-[11px] text-muted-foreground shrink-0 flex items-center gap-1 max-w-[120px]">
+            <MapPin className="h-3 w-3 shrink-0" />
+            <span className="truncate">{metadataLine[0]}</span>
+          </span>
+        )}
         {!selectionMode && (
           <ExpiryDatePicker
             documentId={doc.id}
@@ -384,6 +403,17 @@ export function DocumentCard({ document: doc }: DocumentCardProps) {
           />
         )}
       </div>
+      {metadataLine && (
+        <div className="mt-1.5 space-y-0.5">
+          {metadataLine.map((info, i) => (
+            <div key={i} className="flex items-center gap-1 text-[11px] text-muted-foreground truncate">
+              {i === 0 && (doc.metadata?.city || doc.metadata?.state || doc.metadata?.formattedAddress) && <MapPin className="h-3 w-3 shrink-0" />}
+              {i === 1 && (doc.metadata?.cameraMake || doc.metadata?.cameraModel) && <Camera className="h-3 w-3 shrink-0" />}
+              <span className="truncate">{info}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
