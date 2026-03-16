@@ -3,7 +3,11 @@
 import { useState, useEffect } from 'react';
 import { MapPin, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { requestLocationPermission, hasAskedLocationPermission } from '@/lib/notifications';
+import {
+  requestLocationPermission,
+  getLocationPermissionState,
+  hasAskedLocationPermission,
+} from '@/lib/notifications';
 
 export function LocationPermissionBanner() {
   const [visible, setVisible] = useState(false);
@@ -12,16 +16,22 @@ export function LocationPermissionBanner() {
     if (hasAskedLocationPermission()) return;
     if (!('geolocation' in navigator)) return;
 
-    // Show banner after a short delay
-    const timer = setTimeout(() => setVisible(true), 6000);
-    return () => clearTimeout(timer);
+    // Pre-check: if already granted or denied, no banner needed
+    getLocationPermissionState().then((state) => {
+      if (state === 'granted' || state === 'denied') {
+        localStorage.setItem('doc2save-location-asked', 'true');
+        return;
+      }
+      // State is 'prompt' or 'unknown' — show the banner after a delay
+      setTimeout(() => setVisible(true), 6000);
+    });
   }, []);
 
   if (!visible) return null;
 
-  const handleAllow = async () => {
-    await requestLocationPermission();
-    setVisible(false);
+  // No async, no await — getCurrentPosition fires directly from the click gesture
+  const handleAllow = () => {
+    requestLocationPermission().then(() => setVisible(false));
   };
 
   const handleDismiss = () => {

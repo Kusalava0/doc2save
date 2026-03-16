@@ -47,24 +47,22 @@ export function hasAskedLocationPermission(): boolean {
   return localStorage.getItem(LOCATION_PERMISSION_KEY) === 'true';
 }
 
-export async function requestLocationPermission(): Promise<boolean> {
-  if (!('geolocation' in navigator)) return false;
-
-  // Only request if browser will actually show a prompt
-  if (navigator.permissions) {
-    try {
-      const status = await navigator.permissions.query({ name: 'geolocation' });
-      if (status.state !== 'prompt') {
-        // Already granted or denied — no prompt will appear, don't mark as asked
-        // so we can retry if user resets permissions later
-        return status.state === 'granted';
-      }
-    } catch {
-      // Permissions API not supported — try anyway
-    }
+export async function getLocationPermissionState(): Promise<'granted' | 'denied' | 'prompt' | 'unknown'> {
+  if (!('geolocation' in navigator)) return 'unknown';
+  if (!navigator.permissions) return 'unknown';
+  try {
+    const status = await navigator.permissions.query({ name: 'geolocation' });
+    return status.state;
+  } catch {
+    return 'unknown';
   }
+}
 
+// Must be called DIRECTLY from onClick — no awaits before getCurrentPosition
+export function requestLocationPermission(): Promise<boolean> {
   return new Promise((resolve) => {
+    if (!('geolocation' in navigator)) return resolve(false);
+
     navigator.geolocation.getCurrentPosition(
       () => {
         localStorage.setItem(LOCATION_PERMISSION_KEY, 'true');
@@ -74,7 +72,7 @@ export async function requestLocationPermission(): Promise<boolean> {
         localStorage.setItem(LOCATION_PERMISSION_KEY, 'true');
         resolve(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: false, timeout: 10000 },
     );
   });
 }
