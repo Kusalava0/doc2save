@@ -8,6 +8,7 @@ import { AuthGuard } from '@/components/auth/auth-guard';
 import { ModalDispatcher } from '@/components/shared/modal-dispatcher';
 import { NotificationInit } from '@/components/shared/notification-init';
 import { PwaInstallBanner } from '@/components/shared/pwa-install-banner';
+import { LocationPermissionBanner } from '@/components/shared/location-permission-banner';
 import { useUIStore } from '@/stores/ui-store';
 
 export default function DashboardLayout({
@@ -49,6 +50,7 @@ export default function DashboardLayout({
         <ModalDispatcher />
         <NotificationInit />
         <PwaInstallBanner />
+        <LocationPermissionBanner />
       </div>
     </AuthGuard>
   );

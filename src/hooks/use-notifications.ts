@@ -6,9 +6,7 @@ import { useUser } from '@/hooks/use-user';
 import { useExpiringDocuments } from '@/hooks/use-documents';
 import {
   requestNotificationPermission,
-  requestLocationPermission,
   hasAskedPermission,
-  hasAskedLocationPermission,
   canNotify,
   notifySubscriptionExpiring,
   notifyStorageWarning,
@@ -26,20 +24,12 @@ export function useNotifications() {
   const { data: expiringDocs } = useExpiringDocuments(EMD_WARNING_DAYS);
   const hasChecked = useRef(false);
 
-  // Prompt for permissions on first authenticated load
-  // Chain them so browser doesn't suppress overlapping prompts
+  // Prompt for notification permission on first authenticated load
   useEffect(() => {
-    if (!profile) return;
-
-    const timer = setTimeout(async () => {
-      if (!hasAskedPermission()) {
-        await requestNotificationPermission();
-      }
-      if (!hasAskedLocationPermission()) {
-        await requestLocationPermission();
-      }
+    if (!profile || hasAskedPermission()) return;
+    const timer = setTimeout(() => {
+      requestNotificationPermission();
     }, 5000);
-
     return () => clearTimeout(timer);
   }, [profile]);
 
