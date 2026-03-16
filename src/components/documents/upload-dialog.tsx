@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useQueryClient } from '@tanstack/react-query';
 import { Upload, X, Loader2, Check, File, ScanLine } from 'lucide-react';
@@ -57,17 +57,12 @@ export function UploadDialog({
   const locationRef = useRef<ScanLocation | undefined>(undefined);
   const locationRequestedRef = useRef(false);
 
-  // Request location as soon as the dialog opens
-  useEffect(() => {
-    if (!open || locationRequestedRef.current) return;
+  // Request location on user gesture (not useEffect — Chrome silently
+  // denies geolocation without a recent user interaction)
+  const requestLocationOnGesture = useCallback(() => {
+    if (locationRequestedRef.current || !navigator.geolocation) return;
     locationRequestedRef.current = true;
 
-    if (!navigator.geolocation) return;
-
-    // Always attempt geolocation — browser will show permission prompt
-    // if not yet decided. On mobile, this triggers the native
-    // "Allow location?" dialog with Allow/Block/While using options.
-    // Note: Requires HTTPS — won't work on plain HTTP.
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         locationRef.current = {
@@ -75,17 +70,12 @@ export function UploadDialog({
           longitude: Math.round(pos.coords.longitude * 1000000) / 1000000,
         };
       },
-      (err) => {
-        if (err.code === err.PERMISSION_DENIED) {
-          toast.info(
-            'Location access denied. To tag images with location, enable location permission in your browser site settings and reload.',
-            { duration: 6000 },
-          );
-        }
+      () => {
+        // Permission denied or unavailable — proceed without location
       },
       { enableHighAccuracy: true, timeout: 10000 },
     );
-  }, [open]);
+  }, []);
 
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: any[]) => {
@@ -119,6 +109,7 @@ export function UploadDialog({
     ),
     maxSize: MAX_FILE_SIZE,
     disabled: isUploading,
+    onFileDialogOpen: requestLocationOnGesture,
   });
 
   const removeFile = (id: string) => {
@@ -362,7 +353,7 @@ export function UploadDialog({
         {files.length === 0 && !isUploading && (
           <div className="flex rounded-lg bg-muted p-1 gap-1">
             <button
-              onClick={() => setMode('upload')}
+              onClick={() => { setMode('upload'); requestLocationOnGesture(); }}
               className={`flex-1 flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 mode === 'upload'
                   ? 'bg-background text-foreground shadow-sm'
@@ -373,7 +364,7 @@ export function UploadDialog({
               Upload File
             </button>
             <button
-              onClick={() => setMode('scan')}
+              onClick={() => { setMode('scan'); requestLocationOnGesture(); }}
               className={`flex-1 flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 mode === 'scan'
                   ? 'bg-background text-foreground shadow-sm'
