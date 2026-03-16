@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { Camera, X, Plus, FileText, Loader2, MapPin } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState, useRef, useCallback } from 'react';
+import { Camera, X, Plus, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PDFDocument } from 'pdf-lib';
 
@@ -12,7 +11,7 @@ export interface ScanLocation {
 }
 
 interface DocumentScannerProps {
-  onComplete: (file: File, location?: ScanLocation) => void;
+  onComplete: (file: File) => void;
   onCancel: () => void;
 }
 
@@ -80,41 +79,11 @@ async function pagesToPdf(pages: ScannedPage[]): Promise<Blob> {
 export function DocumentScanner({ onComplete, onCancel }: DocumentScannerProps) {
   const [pages, setPages] = useState<ScannedPage[]>([]);
   const [isCreatingPdf, setIsCreatingPdf] = useState(false);
-  const [location, setLocation] = useState<ScanLocation | undefined>();
-  const [locationRequested, setLocationRequested] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const requestLocation = useCallback((): Promise<ScanLocation | undefined> => {
-    return new Promise((resolve) => {
-      if (!navigator.geolocation) {
-        resolve(undefined);
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const loc = {
-            latitude: Math.round(pos.coords.latitude * 1000000) / 1000000,
-            longitude: Math.round(pos.coords.longitude * 1000000) / 1000000,
-          };
-          setLocation(loc);
-          resolve(loc);
-        },
-        () => {
-          toast.info('Location access denied — images won\'t include location data');
-          resolve(undefined);
-        },
-        { enableHighAccuracy: true, timeout: 10000 },
-      );
-    });
-  }, []);
-
-  const capturePhoto = useCallback(async () => {
-    if (!locationRequested) {
-      setLocationRequested(true);
-      await requestLocation();
-    }
+  const capturePhoto = useCallback(() => {
     fileInputRef.current?.click();
-  }, [locationRequested, requestLocation]);
+  }, []);
 
   const handleFileCapture = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -147,7 +116,7 @@ export function DocumentScanner({ onComplete, onCancel }: DocumentScannerProps) 
       const file = new File([pages[0].blob], `scan-${Date.now()}.jpg`, {
         type: 'image/jpeg',
       });
-      onComplete(file, location);
+      onComplete(file);
       return;
     }
 
@@ -158,7 +127,7 @@ export function DocumentScanner({ onComplete, onCancel }: DocumentScannerProps) 
       const file = new File([pdfBlob], `scan-${Date.now()}.pdf`, {
         type: 'application/pdf',
       });
-      onComplete(file, location);
+      onComplete(file);
     } catch (err) {
       console.error('Failed to create PDF:', err);
     } finally {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useQueryClient } from '@tanstack/react-query';
 import { Upload, X, Loader2, Check, File, ScanLine } from 'lucide-react';
@@ -54,6 +54,38 @@ export function UploadDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [mode, setMode] = useState<'upload' | 'scan'>('upload');
   const activeUploadsRef = useRef(0);
+  const locationRef = useRef<ScanLocation | undefined>(undefined);
+  const locationRequestedRef = useRef(false);
+
+  // Request location as soon as the dialog opens
+  useEffect(() => {
+    if (!open || locationRequestedRef.current) return;
+    locationRequestedRef.current = true;
+
+    if (!navigator.geolocation) return;
+
+    // Always attempt geolocation — browser will show permission prompt
+    // if not yet decided. On mobile, this triggers the native
+    // "Allow location?" dialog with Allow/Block/While using options.
+    // Note: Requires HTTPS — won't work on plain HTTP.
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        locationRef.current = {
+          latitude: Math.round(pos.coords.latitude * 1000000) / 1000000,
+          longitude: Math.round(pos.coords.longitude * 1000000) / 1000000,
+        };
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.info(
+            'Location access denied. To tag images with location, enable location permission in your browser site settings and reload.',
+            { duration: 6000 },
+          );
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }, [open]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: any[]) => {
@@ -71,6 +103,7 @@ export function UploadDialog({
         file,
         status: 'pending' as const,
         progress: 0,
+        scanLocation: locationRef.current,
       }));
 
       setFiles((prev) => [...prev, ...newItems]);
@@ -295,13 +328,13 @@ export function UploadDialog({
     }
   };
 
-  const handleScanComplete = useCallback((file: File, location?: ScanLocation) => {
+  const handleScanComplete = useCallback((file: File) => {
     const newItem: UploadItem = {
       id: `${file.name}-${Date.now()}-${Math.random()}`,
       file,
       status: 'pending',
       progress: 0,
-      scanLocation: location,
+      scanLocation: locationRef.current,
     };
     setFiles((prev) => [...prev, newItem]);
     setMode('upload');
